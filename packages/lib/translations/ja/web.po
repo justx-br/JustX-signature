@@ -582,8 +582,8 @@ msgid "<0>{senderName} {senderEmail}</0> on behalf of \"{0}\" has invited you to
 msgstr "<0>{senderName} {senderEmail}</0> さんが、\"{0}\" を代表してこの文書の閲覧を招待しています。"
 
 #: packages/email/templates/confirm-team-email.tsx
-msgid "<0>{teamName}</0> has requested to use your email address for their team on Documenso."
-msgstr "<0>{teamName}</0> が、Documenso のチーム用メールアドレスとしてあなたのメールアドレスの使用をリクエストしました。"
+msgid "<0>{teamName}</0> has requested to use your email address for their team on JustX."
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/organisation.sso.confirmation.$token.tsx
 msgid "<0>Account management:</0> Modify your account settings, permissions, and preferences"
@@ -835,8 +835,8 @@ msgid "A member has left your organisation {organisationName}"
 msgstr "メンバーが組織 {organisationName} を離れました"
 
 #: packages/email/templates/organisation-leave.tsx
-msgid "A member has left your organisation on Documenso"
-msgstr "メンバーが Documenso の組織を離れました"
+msgid "A member has left your organisation on JustX"
+msgstr ""
 
 #: packages/lib/jobs/definitions/emails/send-organisation-member-joined-email.handler.ts
 msgid "A new member has joined your organisation"
@@ -929,12 +929,12 @@ msgid "Accept & Link Account"
 msgstr "アカウントを承認してリンク"
 
 #: packages/email/templates/organisation-invite.tsx
-msgid "Accept invitation to join an organisation on Documenso"
-msgstr "Documenso の組織参加招待を承諾"
+msgid "Accept invitation to join an organisation on JustX"
+msgstr ""
 
 #: packages/email/templates/confirm-team-email.tsx
-msgid "Accept team email request for {teamName} on Documenso"
-msgstr "Documenso 上の {teamName} のチームメールリクエストを承認"
+msgid "Accept team email request for {teamName} on JustX"
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/articles.signature-disclosure.tsx
 msgid "Acceptance and Consent"
@@ -4013,6 +4013,7 @@ msgstr "例: 100"
 #: apps/remix/app/components/general/document/document-page-view-button.tsx
 #: apps/remix/app/components/general/document/document-page-view-dropdown.tsx
 #: apps/remix/app/components/general/teams/team-email-dropdown.tsx
+#: apps/remix/app/components/tables/admin-dashboard-users-table.tsx
 #: apps/remix/app/components/tables/documents-table-action-button.tsx
 #: apps/remix/app/components/tables/documents-table-action-dropdown.tsx
 #: apps/remix/app/components/tables/settings-security-passkey-table-actions.tsx
@@ -5330,8 +5331,8 @@ msgid "It's currently not your turn to sign. You will receive an email with inst
 msgstr "現在はあなたの署名順ではありません。順番が来ると、文書への署名方法を記載したメールが届きます。"
 
 #: packages/email/templates/organisation-invite.tsx
-msgid "Join {organisationName} on Documenso"
-msgstr "{organisationName} に Documenso で参加"
+msgid "Join {organisationName} on JustX"
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.support.tsx
 msgid "Join our community on <0>Discord</0> for community support and discussion."
@@ -5554,6 +5555,7 @@ msgid "Looking for signature fields"
 msgstr "署名フィールドを探しています"
 
 #: apps/remix/app/components/tables/admin-organisations-table.tsx
+#: apps/remix/app/components/tables/organisation-groups-table.tsx
 #: apps/remix/app/components/tables/organisation-teams-table.tsx
 #: apps/remix/app/components/tables/user-organisations-table.tsx
 msgid "Manage"
@@ -5613,6 +5615,10 @@ msgstr "リンク済みアカウントを管理"
 #: apps/remix/app/routes/_authenticated+/admin+/organisations.$id.tsx
 msgid "Manage organisation"
 msgstr "組織を管理"
+
+#: apps/remix/app/routes/_authenticated+/o.$orgUrl._index.tsx
+msgid "Manage Organisation"
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/admin+/organisations._index.tsx
 msgid "Manage organisations"
@@ -7332,6 +7338,11 @@ msgstr "再試行"
 msgid "Return"
 msgstr "戻る"
 
+#: apps/remix/app/routes/_recipient+/sign.$token+/rejected.tsx
+#: apps/remix/app/routes/_recipient+/sign.$token+/waiting.tsx
+msgid "Return Home"
+msgstr ""
+
 #: apps/remix/app/routes/_unauthenticated+/o.$orgUrl.signin.tsx
 msgid "Return to Documenso sign in page here"
 msgstr "Documenso のサインインページへ戻る"
@@ -8521,8 +8532,8 @@ msgid "Team email removed"
 msgstr "チームメールが削除されました"
 
 #: packages/email/templates/team-email-removed.tsx
-msgid "Team email removed for {teamName} on Documenso"
-msgstr "Documenso にて {teamName} のチームメールが削除されました"
+msgid "Team email removed for {teamName} on JustX"
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/team.verify.email.$token.tsx
 msgid "Team email verification"
@@ -10353,8 +10364,8 @@ msgstr "あなたの順番待ち"
 
 #: apps/remix/app/routes/_recipient+/sign.$token+/_index.tsx
 #: apps/remix/app/routes/_recipient+/sign.$token+/_index.tsx
-msgid "Want to send slick signing links like this one? <0>Check out Documenso</0>."
-msgstr "このようなスマートな署名リンクを送りたいですか？<0>Documenso をチェックしてみてください</0>。"
+msgid "Want to send slick signing links like this one? <0>Check out JustX</0>."
+msgstr ""
 
 #: apps/remix/app/routes/_profile+/_layout.tsx
 msgid "Want your own public profile?"
@@ -11029,8 +11040,8 @@ msgid "You can only detect fields in draft envelopes"
 msgstr "ドラフトの封筒でのみフィールドを検出できます"
 
 #: packages/email/templates/confirm-team-email.tsx
-msgid "You can revoke access at any time in your team settings on Documenso <0>here</0>."
-msgstr "Documenso のチーム設定から、いつでもアクセス権を取り消すことができます。<0>こちら</0>。"
+msgid "You can revoke access at any time in your team settings on JustX <0>here</0>."
+msgstr ""
 
 #: apps/remix/app/components/forms/public-profile-form.tsx
 msgid "You can update the profile URL by updating the team URL in the general settings page."
@@ -11621,4 +11632,3 @@ msgstr "認証コード:"
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.sso.tsx
 msgid "your-domain.com another-domain.com"
 msgstr "your-domain.com another-domain.com"
-

@@ -582,8 +582,8 @@ msgid "<0>{senderName} {senderEmail}</0> on behalf of \"{0}\" has invited you to
 msgstr "<0>{senderName} {senderEmail}</0> 님이 \"{0}\"을(를) 대신하여 이 문서를 열람해 달라고 초대했습니다."
 
 #: packages/email/templates/confirm-team-email.tsx
-msgid "<0>{teamName}</0> has requested to use your email address for their team on Documenso."
-msgstr "<0>{teamName}</0> 팀에서 Documenso에서 사용할 팀용 이메일 주소로 귀하의 이메일 주소를 요청했습니다."
+msgid "<0>{teamName}</0> has requested to use your email address for their team on JustX."
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/organisation.sso.confirmation.$token.tsx
 msgid "<0>Account management:</0> Modify your account settings, permissions, and preferences"
@@ -835,8 +835,8 @@ msgid "A member has left your organisation {organisationName}"
 msgstr "구성원이 조직 {organisationName}을 떠났습니다."
 
 #: packages/email/templates/organisation-leave.tsx
-msgid "A member has left your organisation on Documenso"
-msgstr "구성원이 Documenso의 조직을 떠났습니다."
+msgid "A member has left your organisation on JustX"
+msgstr ""
 
 #: packages/lib/jobs/definitions/emails/send-organisation-member-joined-email.handler.ts
 msgid "A new member has joined your organisation"
@@ -929,12 +929,12 @@ msgid "Accept & Link Account"
 msgstr "계정 수락 및 연결"
 
 #: packages/email/templates/organisation-invite.tsx
-msgid "Accept invitation to join an organisation on Documenso"
-msgstr "Documenso 조직 초대 수락"
+msgid "Accept invitation to join an organisation on JustX"
+msgstr ""
 
 #: packages/email/templates/confirm-team-email.tsx
-msgid "Accept team email request for {teamName} on Documenso"
-msgstr "Documenso에서 {teamName} 팀용 이메일 요청을 승인하세요."
+msgid "Accept team email request for {teamName} on JustX"
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/articles.signature-disclosure.tsx
 msgid "Acceptance and Consent"
@@ -4013,6 +4013,7 @@ msgstr "예: 100"
 #: apps/remix/app/components/general/document/document-page-view-button.tsx
 #: apps/remix/app/components/general/document/document-page-view-dropdown.tsx
 #: apps/remix/app/components/general/teams/team-email-dropdown.tsx
+#: apps/remix/app/components/tables/admin-dashboard-users-table.tsx
 #: apps/remix/app/components/tables/documents-table-action-button.tsx
 #: apps/remix/app/components/tables/documents-table-action-dropdown.tsx
 #: apps/remix/app/components/tables/settings-security-passkey-table-actions.tsx
@@ -5330,8 +5331,8 @@ msgid "It's currently not your turn to sign. You will receive an email with inst
 msgstr "현재는 귀하의 서명 순서가 아닙니다. 순서가 되면 문서 서명 방법이 안내된 이메일을 받게 됩니다."
 
 #: packages/email/templates/organisation-invite.tsx
-msgid "Join {organisationName} on Documenso"
-msgstr "Documenso에서 {organisationName} 조직에 참여하세요."
+msgid "Join {organisationName} on JustX"
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.support.tsx
 msgid "Join our community on <0>Discord</0> for community support and discussion."
@@ -5554,6 +5555,7 @@ msgid "Looking for signature fields"
 msgstr "서명 필드를 찾는 중"
 
 #: apps/remix/app/components/tables/admin-organisations-table.tsx
+#: apps/remix/app/components/tables/organisation-groups-table.tsx
 #: apps/remix/app/components/tables/organisation-teams-table.tsx
 #: apps/remix/app/components/tables/user-organisations-table.tsx
 msgid "Manage"
@@ -5613,6 +5615,10 @@ msgstr "연결된 계정 관리"
 #: apps/remix/app/routes/_authenticated+/admin+/organisations.$id.tsx
 msgid "Manage organisation"
 msgstr "조직 관리"
+
+#: apps/remix/app/routes/_authenticated+/o.$orgUrl._index.tsx
+msgid "Manage Organisation"
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/admin+/organisations._index.tsx
 msgid "Manage organisations"
@@ -7332,6 +7338,11 @@ msgstr "재시도"
 msgid "Return"
 msgstr "돌아가기"
 
+#: apps/remix/app/routes/_recipient+/sign.$token+/rejected.tsx
+#: apps/remix/app/routes/_recipient+/sign.$token+/waiting.tsx
+msgid "Return Home"
+msgstr ""
+
 #: apps/remix/app/routes/_unauthenticated+/o.$orgUrl.signin.tsx
 msgid "Return to Documenso sign in page here"
 msgstr "여기를 눌러 Documenso 로그인 페이지로 돌아가기"
@@ -8521,8 +8532,8 @@ msgid "Team email removed"
 msgstr "팀 이메일 제거됨"
 
 #: packages/email/templates/team-email-removed.tsx
-msgid "Team email removed for {teamName} on Documenso"
-msgstr "Documenso에서 {teamName} 팀의 팀 이메일이 제거되었습니다"
+msgid "Team email removed for {teamName} on JustX"
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/team.verify.email.$token.tsx
 msgid "Team email verification"
@@ -10353,8 +10364,8 @@ msgstr "내 차례를 기다리는 중"
 
 #: apps/remix/app/routes/_recipient+/sign.$token+/_index.tsx
 #: apps/remix/app/routes/_recipient+/sign.$token+/_index.tsx
-msgid "Want to send slick signing links like this one? <0>Check out Documenso</0>."
-msgstr "이와 같이 세련된 서명 링크를 보내고 싶으신가요? <0>Documenso를 확인해 보세요</0>."
+msgid "Want to send slick signing links like this one? <0>Check out JustX</0>."
+msgstr ""
 
 #: apps/remix/app/routes/_profile+/_layout.tsx
 msgid "Want your own public profile?"
@@ -11029,8 +11040,8 @@ msgid "You can only detect fields in draft envelopes"
 msgstr "필드는 초안 봉투에서만 감지할 수 있습니다."
 
 #: packages/email/templates/confirm-team-email.tsx
-msgid "You can revoke access at any time in your team settings on Documenso <0>here</0>."
-msgstr "언제든지 Documenso의 팀 설정에서 <0>여기</0>에서 액세스를 취소할 수 있습니다."
+msgid "You can revoke access at any time in your team settings on JustX <0>here</0>."
+msgstr ""
 
 #: apps/remix/app/components/forms/public-profile-form.tsx
 msgid "You can update the profile URL by updating the team URL in the general settings page."
@@ -11621,4 +11632,3 @@ msgstr "인증 코드:"
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.sso.tsx
 msgid "your-domain.com another-domain.com"
 msgstr "your-domain.com another-domain.com"
-

@@ -577,8 +577,8 @@ msgid "<0>{senderName} {senderEmail}</0> on behalf of \"{0}\" has invited you to
 msgstr "<0>{senderName} {senderEmail}</0> em nome de \"{0}\" convidou você para visualizar este documento"
 
 #: packages/email/templates/confirm-team-email.tsx
-msgid "<0>{teamName}</0> has requested to use your email address for their team on Documenso."
-msgstr "<0>{teamName}</0> solicitou o uso do seu endereço de e-mail para a equipe deles no Documenso."
+msgid "<0>{teamName}</0> has requested to use your email address for their team on JustX."
+msgstr "<0>{teamName}</0> has requested to use your email address for their team on JustX."
 
 #: apps/remix/app/routes/_unauthenticated+/organisation.sso.confirmation.$token.tsx
 msgid "<0>Account management:</0> Modify your account settings, permissions, and preferences"
@@ -830,8 +830,8 @@ msgid "A member has left your organisation {organisationName}"
 msgstr "Um membro deixou sua organização {organisationName}"
 
 #: packages/email/templates/organisation-leave.tsx
-msgid "A member has left your organisation on Documenso"
-msgstr "Um membro deixou sua organização no Documenso"
+msgid "A member has left your organisation on JustX"
+msgstr "A member has left your organisation on JustX"
 
 #: packages/lib/jobs/definitions/emails/send-organisation-member-joined-email.handler.ts
 msgid "A new member has joined your organisation"
@@ -924,12 +924,12 @@ msgid "Accept & Link Account"
 msgstr "Aceitar e Vincular Conta"
 
 #: packages/email/templates/organisation-invite.tsx
-msgid "Accept invitation to join an organisation on Documenso"
-msgstr "Aceitar convite para entrar em uma organização no Documenso"
+msgid "Accept invitation to join an organisation on JustX"
+msgstr "Accept invitation to join an organisation on JustX"
 
 #: packages/email/templates/confirm-team-email.tsx
-msgid "Accept team email request for {teamName} on Documenso"
-msgstr "Aceitar solicitação de e-mail da equipe para {teamName} no Documenso"
+msgid "Accept team email request for {teamName} on JustX"
+msgstr "Accept team email request for {teamName} on JustX"
 
 #: apps/remix/app/routes/_unauthenticated+/articles.signature-disclosure.tsx
 msgid "Acceptance and Consent"
@@ -4008,6 +4008,7 @@ msgstr "Ex: 100"
 #: apps/remix/app/components/general/document/document-page-view-button.tsx
 #: apps/remix/app/components/general/document/document-page-view-dropdown.tsx
 #: apps/remix/app/components/general/teams/team-email-dropdown.tsx
+#: apps/remix/app/components/tables/admin-dashboard-users-table.tsx
 #: apps/remix/app/components/tables/documents-table-action-button.tsx
 #: apps/remix/app/components/tables/documents-table-action-dropdown.tsx
 #: apps/remix/app/components/tables/settings-security-passkey-table-actions.tsx
@@ -5325,8 +5326,8 @@ msgid "It's currently not your turn to sign. You will receive an email with inst
 msgstr "No momento, não é sua vez de assinar. Você receberá um e-mail com instruções assim que for sua vez de assinar o documento."
 
 #: packages/email/templates/organisation-invite.tsx
-msgid "Join {organisationName} on Documenso"
-msgstr "Junte-se a {organisationName} no Documenso"
+msgid "Join {organisationName} on JustX"
+msgstr "Join {organisationName} on JustX"
 
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.support.tsx
 msgid "Join our community on <0>Discord</0> for community support and discussion."
@@ -5549,6 +5550,7 @@ msgid "Looking for signature fields"
 msgstr "Procurando campos de assinatura"
 
 #: apps/remix/app/components/tables/admin-organisations-table.tsx
+#: apps/remix/app/components/tables/organisation-groups-table.tsx
 #: apps/remix/app/components/tables/organisation-teams-table.tsx
 #: apps/remix/app/components/tables/user-organisations-table.tsx
 msgid "Manage"
@@ -5608,6 +5610,10 @@ msgstr "Gerenciar contas vinculadas"
 #: apps/remix/app/routes/_authenticated+/admin+/organisations.$id.tsx
 msgid "Manage organisation"
 msgstr "Gerenciar organização"
+
+#: apps/remix/app/routes/_authenticated+/o.$orgUrl._index.tsx
+msgid "Manage Organisation"
+msgstr "Manage Organisation"
 
 #: apps/remix/app/routes/_authenticated+/admin+/organisations._index.tsx
 msgid "Manage organisations"
@@ -7327,6 +7333,11 @@ msgstr "Tentar novamente"
 msgid "Return"
 msgstr "Retornar"
 
+#: apps/remix/app/routes/_recipient+/sign.$token+/rejected.tsx
+#: apps/remix/app/routes/_recipient+/sign.$token+/waiting.tsx
+msgid "Return Home"
+msgstr "Return Home"
+
 #: apps/remix/app/routes/_unauthenticated+/o.$orgUrl.signin.tsx
 msgid "Return to Documenso sign in page here"
 msgstr "Retornar para a página de login do Documenso aqui"
@@ -8516,8 +8527,8 @@ msgid "Team email removed"
 msgstr "E-mail da equipe removido"
 
 #: packages/email/templates/team-email-removed.tsx
-msgid "Team email removed for {teamName} on Documenso"
-msgstr "E-mail da equipe removido para {teamName} no Documenso"
+msgid "Team email removed for {teamName} on JustX"
+msgstr "Team email removed for {teamName} on JustX"
 
 #: apps/remix/app/routes/_unauthenticated+/team.verify.email.$token.tsx
 msgid "Team email verification"
@@ -10348,8 +10359,8 @@ msgstr "Aguardando Sua Vez"
 
 #: apps/remix/app/routes/_recipient+/sign.$token+/_index.tsx
 #: apps/remix/app/routes/_recipient+/sign.$token+/_index.tsx
-msgid "Want to send slick signing links like this one? <0>Check out Documenso</0>."
-msgstr ""
+msgid "Want to send slick signing links like this one? <0>Check out JustX</0>."
+msgstr "Want to send slick signing links like this one? <0>Check out JustX</0>."
 
 #: apps/remix/app/routes/_profile+/_layout.tsx
 msgid "Want your own public profile?"
@@ -11024,8 +11035,8 @@ msgid "You can only detect fields in draft envelopes"
 msgstr "Você só pode detectar campos em envelopes de rascunho"
 
 #: packages/email/templates/confirm-team-email.tsx
-msgid "You can revoke access at any time in your team settings on Documenso <0>here</0>."
-msgstr ""
+msgid "You can revoke access at any time in your team settings on JustX <0>here</0>."
+msgstr "You can revoke access at any time in your team settings on JustX <0>here</0>."
 
 #: apps/remix/app/components/forms/public-profile-form.tsx
 msgid "You can update the profile URL by updating the team URL in the general settings page."

@@ -582,8 +582,8 @@ msgid "<0>{senderName} {senderEmail}</0> on behalf of \"{0}\" has invited you to
 msgstr "<0>{senderName} {senderEmail}</0> im Namen von \"{0}\" hat Sie eingeladen, dieses Dokument anzusehen"
 
 #: packages/email/templates/confirm-team-email.tsx
-msgid "<0>{teamName}</0> has requested to use your email address for their team on Documenso."
-msgstr "<0>{teamName}</0> hat angefragt, Ihre E-Mail-Adresse für ihr Team bei Documenso zu verwenden."
+msgid "<0>{teamName}</0> has requested to use your email address for their team on JustX."
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/organisation.sso.confirmation.$token.tsx
 msgid "<0>Account management:</0> Modify your account settings, permissions, and preferences"
@@ -835,8 +835,8 @@ msgid "A member has left your organisation {organisationName}"
 msgstr "Ein Mitglied hat Ihre Organisation {organisationName} verlassen"
 
 #: packages/email/templates/organisation-leave.tsx
-msgid "A member has left your organisation on Documenso"
-msgstr "Ein Mitglied hat Ihre Organisation auf Documenso verlassen"
+msgid "A member has left your organisation on JustX"
+msgstr ""
 
 #: packages/lib/jobs/definitions/emails/send-organisation-member-joined-email.handler.ts
 msgid "A new member has joined your organisation"
@@ -929,12 +929,12 @@ msgid "Accept & Link Account"
 msgstr "Akzeptieren & Konto verknüpfen"
 
 #: packages/email/templates/organisation-invite.tsx
-msgid "Accept invitation to join an organisation on Documenso"
-msgstr "Einladung annehmen, um einer Organisation auf Documenso beizutreten"
+msgid "Accept invitation to join an organisation on JustX"
+msgstr ""
 
 #: packages/email/templates/confirm-team-email.tsx
-msgid "Accept team email request for {teamName} on Documenso"
-msgstr "Akzeptiere die Team-E-Mail-Anfrage für {teamName} bei Documenso"
+msgid "Accept team email request for {teamName} on JustX"
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/articles.signature-disclosure.tsx
 msgid "Acceptance and Consent"
@@ -4013,6 +4013,7 @@ msgstr "Z. B. 100"
 #: apps/remix/app/components/general/document/document-page-view-button.tsx
 #: apps/remix/app/components/general/document/document-page-view-dropdown.tsx
 #: apps/remix/app/components/general/teams/team-email-dropdown.tsx
+#: apps/remix/app/components/tables/admin-dashboard-users-table.tsx
 #: apps/remix/app/components/tables/documents-table-action-button.tsx
 #: apps/remix/app/components/tables/documents-table-action-dropdown.tsx
 #: apps/remix/app/components/tables/settings-security-passkey-table-actions.tsx
@@ -5330,8 +5331,8 @@ msgid "It's currently not your turn to sign. You will receive an email with inst
 msgstr "Es ist derzeit nicht deine Reihe zu unterschreiben. Du erhältst eine E-Mail mit Anweisungen, sobald es deine Reihe ist, das Dokument zu unterschreiben."
 
 #: packages/email/templates/organisation-invite.tsx
-msgid "Join {organisationName} on Documenso"
-msgstr "Tritt {organisationName} auf Documenso bei"
+msgid "Join {organisationName} on JustX"
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.support.tsx
 msgid "Join our community on <0>Discord</0> for community support and discussion."
@@ -5554,6 +5555,7 @@ msgid "Looking for signature fields"
 msgstr "Signaturfelder werden gesucht"
 
 #: apps/remix/app/components/tables/admin-organisations-table.tsx
+#: apps/remix/app/components/tables/organisation-groups-table.tsx
 #: apps/remix/app/components/tables/organisation-teams-table.tsx
 #: apps/remix/app/components/tables/user-organisations-table.tsx
 msgid "Manage"
@@ -5613,6 +5615,10 @@ msgstr "Verknüpfte Konten verwalten"
 #: apps/remix/app/routes/_authenticated+/admin+/organisations.$id.tsx
 msgid "Manage organisation"
 msgstr "Organisation verwalten"
+
+#: apps/remix/app/routes/_authenticated+/o.$orgUrl._index.tsx
+msgid "Manage Organisation"
+msgstr ""
 
 #: apps/remix/app/routes/_authenticated+/admin+/organisations._index.tsx
 msgid "Manage organisations"
@@ -7332,6 +7338,11 @@ msgstr "Wiederholen"
 msgid "Return"
 msgstr "Zurück"
 
+#: apps/remix/app/routes/_recipient+/sign.$token+/rejected.tsx
+#: apps/remix/app/routes/_recipient+/sign.$token+/waiting.tsx
+msgid "Return Home"
+msgstr ""
+
 #: apps/remix/app/routes/_unauthenticated+/o.$orgUrl.signin.tsx
 msgid "Return to Documenso sign in page here"
 msgstr "Hier zur Documenso-Anmeldeseite zurückkehren"
@@ -8521,8 +8532,8 @@ msgid "Team email removed"
 msgstr "Team-E-Mail entfernt"
 
 #: packages/email/templates/team-email-removed.tsx
-msgid "Team email removed for {teamName} on Documenso"
-msgstr "Team-E-Mail für {teamName} auf Documenso entfernt"
+msgid "Team email removed for {teamName} on JustX"
+msgstr ""
 
 #: apps/remix/app/routes/_unauthenticated+/team.verify.email.$token.tsx
 msgid "Team email verification"
@@ -10353,8 +10364,8 @@ msgstr "Warten auf deine Reihe"
 
 #: apps/remix/app/routes/_recipient+/sign.$token+/_index.tsx
 #: apps/remix/app/routes/_recipient+/sign.$token+/_index.tsx
-msgid "Want to send slick signing links like this one? <0>Check out Documenso</0>."
-msgstr "Möchtest du schicke Signatur-Links wie diesen versenden? <0>Sieh dir Documenso an</0>."
+msgid "Want to send slick signing links like this one? <0>Check out JustX</0>."
+msgstr ""
 
 #: apps/remix/app/routes/_profile+/_layout.tsx
 msgid "Want your own public profile?"
@@ -11029,8 +11040,8 @@ msgid "You can only detect fields in draft envelopes"
 msgstr "Sie können Felder nur in Entwürfen von Umschlägen erkennen."
 
 #: packages/email/templates/confirm-team-email.tsx
-msgid "You can revoke access at any time in your team settings on Documenso <0>here</0>."
-msgstr "Sie können den Zugriff jederzeit in Ihren Teameinstellungen auf Documenso <0>hier</0> widerrufen."
+msgid "You can revoke access at any time in your team settings on JustX <0>here</0>."
+msgstr ""
 
 #: apps/remix/app/components/forms/public-profile-form.tsx
 msgid "You can update the profile URL by updating the team URL in the general settings page."
@@ -11621,4 +11632,3 @@ msgstr "Ihr Verifizierungscode:"
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.sso.tsx
 msgid "your-domain.com another-domain.com"
 msgstr "your-domain.com another-domain.com"
-
