@@ -17,8 +17,9 @@ import { Badge } from '@documenso/ui/primitives/badge';
 import { Button } from '@documenso/ui/primitives/button';
 import { Separator } from '@documenso/ui/primitives/separator';
 
-import { EnvelopeDistributeDialog } from '~/components/dialogs/envelope-distribute-dialog';
 import { EnvelopeRedistributeDialog } from '~/components/dialogs/envelope-redistribute-dialog';
+
+import { EnvelopeDirectSignButton } from './envelope-direct-sign-button';
 import { TemplateUseDialog } from '~/components/dialogs/template-use-dialog';
 import { BrandingLogo } from '~/components/general/branding-logo';
 import { DocumentAttachmentsPopover } from '~/components/general/document/document-attachments-popover';
@@ -139,15 +140,7 @@ export default function EnvelopeEditorHeader() {
 
           {isDocument && (
             <>
-              <EnvelopeDistributeDialog
-                documentRootPath={relativePath.documentRootPath}
-                trigger={
-                  <Button size="sm">
-                    <SendIcon className="mr-2 h-4 w-4" />
-                    <Trans>Send Document</Trans>
-                  </Button>
-                }
-              />
+              <EnvelopeDirectSignButton />
 
               <EnvelopeRedistributeDialog
                 envelope={envelope}

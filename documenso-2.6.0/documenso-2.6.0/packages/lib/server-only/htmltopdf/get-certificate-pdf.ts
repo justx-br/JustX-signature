@@ -51,7 +51,7 @@ export const getCertificatePdf = async ({ documentId, language }: GetCertificate
 
   const page = await browserContext.newPage();
 
-  const lang = isValidLanguageCode(language) ? language : 'en';
+  const lang = isValidLanguageCode(language) ? language : 'pt-BR';
 
   await page.context().addCookies([
     {
