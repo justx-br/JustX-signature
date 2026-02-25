@@ -4,7 +4,7 @@ import { prisma } from '@documenso/prisma';
 
 import { ADMIN_USER_EMAIL, ADMIN_USER_NAME, ADMIN_USER_PASSWORD } from '../../constants/app';
 import { hashSync } from '../auth/hash';
-import { createPersonalOrganisation } from '../organisation/create-organisation';
+import { onCreateUserHook } from '../user/create-user';
 
 /**
  * Initializes or updates the admin user from environment variables on application startup.
@@ -50,6 +50,13 @@ export const initializeAdminUser = async (): Promise<void> => {
       } else {
         console.log(`[AdminUserInitializer] Admin user already configured: ${adminEmail}`);
       }
+
+      await onCreateUserHook(existingUser).catch((err) => {
+        console.error(
+          '[AdminUserInitializer] onCreateUserHook failed for existing admin user:',
+          err,
+        );
+      });
     } else {
       // Create new admin user
       const hashedPassword = hashSync(adminPassword);
@@ -64,10 +71,8 @@ export const initializeAdminUser = async (): Promise<void> => {
         },
       });
 
-      // Create personal organisation for the admin user
-      await createPersonalOrganisation({
-        userId: user.id,
-        inheritMembers: true,
+      await onCreateUserHook(user).catch((err) => {
+        console.error('[AdminUserInitializer] onCreateUserHook failed for admin user:', err);
       });
 
       console.log(`[AdminUserInitializer] Created admin user: ${adminEmail}`);
