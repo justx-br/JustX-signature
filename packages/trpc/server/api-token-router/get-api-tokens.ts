@@ -7,7 +7,11 @@ export const getApiTokensRoute = adminProcedure
   .input(ZGetApiTokensRequestSchema)
   .output(ZGetApiTokensResponseSchema)
   .query(async ({ ctx }) => {
-    const { teamId } = ctx;
+    const { teamId, user } = ctx;
+
+    if (teamId == null || user?.id == null) {
+      throw new Error('Unauthorized or missing team context');
+    }
 
     ctx.logger.info({
       input: {
@@ -15,5 +19,5 @@ export const getApiTokensRoute = adminProcedure
       },
     });
 
-    return await getApiTokens({ userId: ctx.user.id, teamId });
+    return await getApiTokens({ userId: user.id, teamId });
   });

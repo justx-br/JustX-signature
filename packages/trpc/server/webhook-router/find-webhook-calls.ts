@@ -17,14 +17,19 @@ export const findWebhookCallsRoute = adminProcedure
   .output(ZFindWebhookCallsResponseSchema)
   .query(async ({ input, ctx }) => {
     const { webhookId, page, perPage, status, query, events } = input;
+    const { teamId, user } = ctx;
+
+    if (teamId == null || user?.id == null) {
+      throw new Error('Unauthorized or missing team context');
+    }
 
     ctx.logger.info({
       input: { webhookId, status },
     });
 
     return await findWebhookCalls({
-      userId: ctx.user.id,
-      teamId: ctx.teamId,
+      userId: user.id,
+      teamId,
       webhookId,
       page,
       perPage,
