@@ -12,7 +12,9 @@ import {
 import { Link, NavLink, Outlet, redirect } from 'react-router';
 
 import { getSession } from '@documenso/auth/server/lib/utils/get-session';
+import { useSession } from '@documenso/lib/client-only/providers/session';
 import { getTeamByUrl } from '@documenso/lib/server-only/team/get-team';
+import { isAdmin } from '@documenso/lib/utils/is-admin';
 import { canExecuteTeamAction } from '@documenso/lib/utils/teams';
 import { cn } from '@documenso/ui/lib/utils';
 import { Button } from '@documenso/ui/primitives/button';
@@ -48,33 +50,14 @@ export default function TeamsSettingsLayout() {
   const { t } = useLingui();
 
   const team = useCurrentTeam();
+  const { user } = useSession();
+  const isUserAdmin = isAdmin(user);
 
   const teamSettingRoutes = [
     {
       path: `/t/${team.url}/settings`,
       label: t`General`,
       icon: SettingsIcon,
-    },
-    {
-      path: `/t/${team.url}/settings/document`,
-      label: t`Preferences`,
-      icon: Settings2Icon,
-      isSubNavParent: true,
-    },
-    {
-      path: `/t/${team.url}/settings/document`,
-      label: t`Document`,
-      isSubNav: true,
-    },
-    {
-      path: `/t/${team.url}/settings/branding`,
-      label: t`Branding`,
-      isSubNav: true,
-    },
-    {
-      path: `/t/${team.url}/settings/email`,
-      label: t`Email`,
-      isSubNav: true,
     },
     {
       path: `/t/${team.url}/settings/public-profile`,
@@ -91,16 +74,42 @@ export default function TeamsSettingsLayout() {
       label: t`Groups`,
       icon: GroupIcon,
     },
-    {
-      path: `/t/${team.url}/settings/tokens`,
-      label: t`API Tokens`,
-      icon: BracesIcon,
-    },
-    {
-      path: `/t/${team.url}/settings/webhooks`,
-      label: t`Webhooks`,
-      icon: WebhookIcon,
-    },
+    // Admin-only routes
+    ...(isUserAdmin
+      ? [
+          {
+            path: `/t/${team.url}/settings/document`,
+            label: t`Preferences`,
+            icon: Settings2Icon,
+            isSubNavParent: true,
+          },
+          {
+            path: `/t/${team.url}/settings/document`,
+            label: t`Document`,
+            isSubNav: true,
+          },
+          {
+            path: `/t/${team.url}/settings/branding`,
+            label: t`Branding`,
+            isSubNav: true,
+          },
+          {
+            path: `/t/${team.url}/settings/email`,
+            label: t`Email`,
+            isSubNav: true,
+          },
+          {
+            path: `/t/${team.url}/settings/tokens`,
+            label: t`API Tokens`,
+            icon: BracesIcon,
+          },
+          {
+            path: `/t/${team.url}/settings/webhooks`,
+            label: t`Webhooks`,
+            icon: WebhookIcon,
+          },
+        ]
+      : []),
   ];
 
   if (!canExecuteTeamAction('MANAGE_TEAM', team.currentTeamRole)) {

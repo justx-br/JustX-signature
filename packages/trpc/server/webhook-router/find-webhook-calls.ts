@@ -1,4 +1,4 @@
-import { Prisma, WebhookCallStatus, WebhookTriggerEvents } from '@prisma/client';
+import type { Prisma, WebhookCallStatus, WebhookTriggerEvents } from '@prisma/client';
 
 import { TEAM_MEMBER_ROLE_PERMISSIONS_MAP } from '@documenso/lib/constants/teams';
 import { AppError, AppErrorCode } from '@documenso/lib/errors/app-error';
@@ -6,13 +6,13 @@ import type { FindResultResponse } from '@documenso/lib/types/search-params';
 import { buildTeamWhereQuery } from '@documenso/lib/utils/teams';
 import { prisma } from '@documenso/prisma';
 
-import { authenticatedProcedure } from '../trpc';
+import { adminProcedure } from '../trpc';
 import {
   ZFindWebhookCallsRequestSchema,
   ZFindWebhookCallsResponseSchema,
 } from './find-webhook-calls.types';
 
-export const findWebhookCallsRoute = authenticatedProcedure
+export const findWebhookCallsRoute = adminProcedure
   .input(ZFindWebhookCallsRequestSchema)
   .output(ZFindWebhookCallsResponseSchema)
   .query(async ({ input, ctx }) => {

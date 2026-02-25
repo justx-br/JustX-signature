@@ -1,9 +1,9 @@
 import { getApiTokens } from '@documenso/lib/server-only/public-api/get-api-tokens';
 
-import { authenticatedProcedure } from '../trpc';
+import { adminProcedure } from '../trpc';
 import { ZGetApiTokensRequestSchema, ZGetApiTokensResponseSchema } from './get-api-tokens.types';
 
-export const getApiTokensRoute = authenticatedProcedure
+export const getApiTokensRoute = adminProcedure
   .input(ZGetApiTokensRequestSchema)
   .output(ZGetApiTokensResponseSchema)
   .query(async ({ ctx }) => {

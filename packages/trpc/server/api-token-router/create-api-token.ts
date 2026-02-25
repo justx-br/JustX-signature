@@ -1,12 +1,12 @@
 import { createApiToken } from '@documenso/lib/server-only/public-api/create-api-token';
 
-import { authenticatedProcedure } from '../trpc';
+import { adminProcedure } from '../trpc';
 import {
   ZCreateApiTokenRequestSchema,
   ZCreateApiTokenResponseSchema,
 } from './create-api-token.types';
 
-export const createApiTokenRoute = authenticatedProcedure
+export const createApiTokenRoute = adminProcedure
   .input(ZCreateApiTokenRequestSchema)
   .output(ZCreateApiTokenResponseSchema)
   .mutation(async ({ input, ctx }) => {

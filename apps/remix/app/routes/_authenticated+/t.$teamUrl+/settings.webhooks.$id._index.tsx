@@ -20,9 +20,12 @@ import { z } from 'zod';
 import { useDebouncedValue } from '@documenso/lib/client-only/hooks/use-debounced-value';
 import { useIsMounted } from '@documenso/lib/client-only/hooks/use-is-mounted';
 import { useUpdateSearchParams } from '@documenso/lib/client-only/hooks/use-update-search-params';
+import { useSession } from '@documenso/lib/client-only/providers/session';
 import { ZUrlSearchParamsSchema } from '@documenso/lib/types/search-params';
 import { toFriendlyWebhookEventName } from '@documenso/lib/universal/webhook/to-friendly-webhook-event-name';
+import { isAdmin } from '@documenso/lib/utils/is-admin';
 import { trpc } from '@documenso/trpc/react';
+import { Alert, AlertDescription, AlertTitle } from '@documenso/ui/primitives/alert';
 import { Badge } from '@documenso/ui/primitives/badge';
 import { Button } from '@documenso/ui/primitives/button';
 import type { DataTableColumnDef } from '@documenso/ui/primitives/data-table';
@@ -66,6 +69,8 @@ export default function WebhookPage({ params }: Route.ComponentProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const updateSearchParams = useUpdateSearchParams();
   const team = useCurrentTeam();
+  const { user } = useSession();
+  const isUserAdmin = isAdmin(user);
 
   const [searchQuery, setSearchQuery] = useState(() => searchParams?.get('query') ?? '');
 
@@ -79,21 +84,24 @@ export default function WebhookPage({ params }: Route.ComponentProps) {
     {
       id: params.id,
     },
-    { enabled: !!params.id, retry: false },
+    { enabled: !!params.id && isUserAdmin, retry: false },
   );
 
   const {
     data,
     isLoading: isLogsLoading,
     isLoadingError: isLogsLoadingError,
-  } = trpc.webhook.calls.find.useQuery({
-    webhookId: params.id,
-    page: parsedSearchParams.page,
-    perPage: parsedSearchParams.perPage,
-    status: parsedSearchParams.status,
-    events: parsedSearchParams.events,
-    query: parsedSearchParams.query,
-  });
+  } = trpc.webhook.calls.find.useQuery(
+    {
+      webhookId: params.id,
+      page: parsedSearchParams.page,
+      perPage: parsedSearchParams.perPage,
+      status: parsedSearchParams.status,
+      events: parsedSearchParams.events,
+      query: parsedSearchParams.query,
+    },
+    { enabled: isUserAdmin },
+  );
 
   /**
    * Handle debouncing the search query.
@@ -151,10 +159,10 @@ export default function WebhookPage({ params }: Route.ComponentProps) {
         accessorKey: 'event',
         cell: ({ row }) => (
           <div>
-            <p className="text-foreground text-sm font-semibold">
+            <p className="text-sm font-semibold text-foreground">
               {toFriendlyWebhookEventName(row.original.event)}
             </p>
-            <p className="text-muted-foreground text-xs">{row.original.id}</p>
+            <p className="text-xs text-muted-foreground">{row.original.id}</p>
           </div>
         ),
       },
@@ -200,6 +208,27 @@ export default function WebhookPage({ params }: Route.ComponentProps) {
 
     return path;
   };
+
+  if (!isUserAdmin) {
+    return (
+      <div>
+        <SettingsHeader title={t`Webhook`} subtitle={t`Webhook details and logs`} />
+        <Alert
+          className="flex flex-col items-center justify-between gap-4 p-6 md:flex-row"
+          variant="warning"
+        >
+          <div>
+            <AlertTitle>
+              <Trans>Unauthorized</Trans>
+            </AlertTitle>
+            <AlertDescription className="mr-2">
+              <Trans>You need to be an admin to view webhook details.</Trans>
+            </AlertDescription>
+          </div>
+        </Alert>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return <SpinnerBox className="py-32" />;
@@ -276,17 +305,17 @@ export default function WebhookPage({ params }: Route.ComponentProps) {
 
           <Tabs value={parsedSearchParams.status || ''} className="flex-shrink-0">
             <TabsList>
-              <TabsTrigger className="hover:text-foreground min-w-[60px]" value="" asChild>
+              <TabsTrigger className="min-w-[60px] hover:text-foreground" value="" asChild>
                 <Link to={getTabHref('')}>
                   <Trans>All</Trans>
                 </Link>
               </TabsTrigger>
-              <TabsTrigger className="hover:text-foreground min-w-[60px]" value="SUCCESS" asChild>
+              <TabsTrigger className="min-w-[60px] hover:text-foreground" value="SUCCESS" asChild>
                 <Link to={getTabHref(WebhookCallStatus.SUCCESS)}>
                   <Trans>Success</Trans>
                 </Link>
               </TabsTrigger>
-              <TabsTrigger className="hover:text-foreground min-w-[60px]" value="FAILED" asChild>
+              <TabsTrigger className="min-w-[60px] hover:text-foreground" value="FAILED" asChild>
                 <Link to={getTabHref(WebhookCallStatus.FAILED)}>
                   <Trans>Failed</Trans>
                 </Link>
@@ -375,7 +404,7 @@ const WebhookEventCombobox = () => {
   return (
     <MultiSelectCombobox
       emptySelectionPlaceholder={
-        <p className="text-muted-foreground font-normal">
+        <p className="font-normal text-muted-foreground">
           <Trans>
             <span className="text-muted-foreground/70">Events:</span> All
           </Trans>

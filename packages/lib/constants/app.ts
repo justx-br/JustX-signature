@@ -39,3 +39,22 @@ export const NEXT_PRIVATE_USE_PLAYWRIGHT_PDF = () =>
 
 export const NEXT_PRIVATE_SIGNING_TIMESTAMP_AUTHORITY = () =>
   env('NEXT_PRIVATE_SIGNING_TIMESTAMP_AUTHORITY');
+
+/**
+ * Global webhook URL that receives all document events regardless of team/user.
+ * When set, all document events will trigger a webhook to this URL in addition to
+ * any team-specific webhooks.
+ */
+export const GLOBAL_WEBHOOK_URL = () => env('GLOBAL_WEBHOOK_URL');
+
+/**
+ * Optional secret for the global webhook to verify webhook authenticity.
+ */
+export const GLOBAL_WEBHOOK_SECRET = () => env('GLOBAL_WEBHOOK_SECRET');
+
+/**
+ * Admin user configuration from environment variables.
+ */
+export const ADMIN_USER_EMAIL = () => env('ADMIN_USER_EMAIL');
+export const ADMIN_USER_PASSWORD = () => env('ADMIN_USER_PASSWORD');
+export const ADMIN_USER_NAME = () => env('ADMIN_USER_NAME') ?? 'Admin';

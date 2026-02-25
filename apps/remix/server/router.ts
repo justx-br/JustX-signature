@@ -10,6 +10,7 @@ import { tsRestHonoApp } from '@documenso/api/hono';
 import { auth } from '@documenso/auth/server';
 import { API_V2_BETA_URL, API_V2_URL } from '@documenso/lib/constants/app';
 import { jobsClient } from '@documenso/lib/jobs/client';
+import { AdminUserInitializer } from '@documenso/lib/server-only/admin/admin-user-initializer';
 import { LicenseClient } from '@documenso/lib/server-only/license/license-client';
 import { TelemetryClient } from '@documenso/lib/server-only/telemetry/telemetry-client';
 import { getIpAddress } from '@documenso/lib/universal/get-ip-address';
@@ -143,5 +144,8 @@ if (env('NODE_ENV') !== 'development') {
 
 // Start license client to verify license on startup.
 void LicenseClient.start();
+
+// Initialize admin user from environment variables.
+void AdminUserInitializer.start();
 
 export default app;

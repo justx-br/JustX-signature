@@ -544,7 +544,8 @@ const renderRow = (options: RenderRowOptions) => {
 const renderBranding = async ({ qrToken, i18n }: { qrToken: string | null; i18n: I18n }) => {
   const branding = new Konva.Group();
 
-  const brandingHeight = 12;
+  // Slightly larger logo so it visually matches the text
+  const brandingHeight = 26;
 
   const text = new Konva.Text({
     x: 0,

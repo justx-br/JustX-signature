@@ -1,12 +1,12 @@
 import { deleteTokenById } from '@documenso/lib/server-only/public-api/delete-api-token-by-id';
 
-import { authenticatedProcedure } from '../trpc';
+import { adminProcedure } from '../trpc';
 import {
   ZDeleteApiTokenRequestSchema,
   ZDeleteApiTokenResponseSchema,
 } from './delete-api-token.types';
 
-export const deleteApiTokenRoute = authenticatedProcedure
+export const deleteApiTokenRoute = adminProcedure
   .input(ZDeleteApiTokenRequestSchema)
   .output(ZDeleteApiTokenResponseSchema)
   .mutation(async ({ input, ctx }) => {

@@ -5,7 +5,7 @@ import { getWebhookById } from '@documenso/lib/server-only/webhooks/get-webhook-
 import { getWebhooksByTeamId } from '@documenso/lib/server-only/webhooks/get-webhooks-by-team-id';
 import { triggerTestWebhook } from '@documenso/lib/server-only/webhooks/trigger-test-webhook';
 
-import { authenticatedProcedure, router } from '../trpc';
+import { adminProcedure, router } from '../trpc';
 import { findWebhookCallsRoute } from './find-webhook-calls';
 import { resendWebhookCallRoute } from './resend-webhook-call';
 import {
@@ -22,7 +22,7 @@ export const webhookRouter = router({
     resend: resendWebhookCallRoute,
   },
 
-  getTeamWebhooks: authenticatedProcedure.query(async ({ ctx }) => {
+  getTeamWebhooks: adminProcedure.query(async ({ ctx }) => {
     ctx.logger.info({
       input: {
         teamId: ctx.teamId,
@@ -32,7 +32,7 @@ export const webhookRouter = router({
     return await getWebhooksByTeamId(ctx.teamId, ctx.user.id);
   }),
 
-  getWebhookById: authenticatedProcedure
+  getWebhookById: adminProcedure
     .input(ZGetWebhookByIdRequestSchema)
     .query(async ({ input, ctx }) => {
       const { id } = input;
@@ -50,7 +50,7 @@ export const webhookRouter = router({
       });
     }),
 
-  createWebhook: authenticatedProcedure
+  createWebhook: adminProcedure
     .input(ZCreateWebhookRequestSchema)
     .mutation(async ({ input, ctx }) => {
       const { enabled, eventTriggers, secret, webhookUrl } = input;
@@ -65,7 +65,7 @@ export const webhookRouter = router({
       });
     }),
 
-  deleteWebhook: authenticatedProcedure
+  deleteWebhook: adminProcedure
     .input(ZDeleteWebhookRequestSchema)
     .mutation(async ({ input, ctx }) => {
       const { id } = input;
@@ -83,26 +83,24 @@ export const webhookRouter = router({
       });
     }),
 
-  editWebhook: authenticatedProcedure
-    .input(ZEditWebhookRequestSchema)
-    .mutation(async ({ input, ctx }) => {
-      const { id, ...data } = input;
+  editWebhook: adminProcedure.input(ZEditWebhookRequestSchema).mutation(async ({ input, ctx }) => {
+    const { id, ...data } = input;
 
-      ctx.logger.info({
-        input: {
-          id,
-        },
-      });
-
-      return await editWebhook({
+    ctx.logger.info({
+      input: {
         id,
-        data,
-        userId: ctx.user.id,
-        teamId: ctx.teamId,
-      });
-    }),
+      },
+    });
 
-  testWebhook: authenticatedProcedure
+    return await editWebhook({
+      id,
+      data,
+      userId: ctx.user.id,
+      teamId: ctx.teamId,
+    });
+  }),
+
+  testWebhook: adminProcedure
     .input(ZTriggerTestWebhookRequestSchema)
     .mutation(async ({ input, ctx }) => {
       const { id, event } = input;

@@ -1,18 +1,17 @@
-import { Prisma, WebhookCallStatus, WebhookTriggerEvents } from '@prisma/client';
+import { Prisma, WebhookCallStatus } from '@prisma/client';
 
 import { TEAM_MEMBER_ROLE_PERMISSIONS_MAP } from '@documenso/lib/constants/teams';
 import { AppError, AppErrorCode } from '@documenso/lib/errors/app-error';
-import type { FindResultResponse } from '@documenso/lib/types/search-params';
 import { buildTeamWhereQuery } from '@documenso/lib/utils/teams';
 import { prisma } from '@documenso/prisma';
 
-import { authenticatedProcedure } from '../trpc';
+import { adminProcedure } from '../trpc';
 import {
   ZResendWebhookCallRequestSchema,
   ZResendWebhookCallResponseSchema,
 } from './resend-webhook-call.types';
 
-export const resendWebhookCallRoute = authenticatedProcedure
+export const resendWebhookCallRoute = adminProcedure
   .input(ZResendWebhookCallRequestSchema)
   .output(ZResendWebhookCallResponseSchema)
   .mutation(async ({ input, ctx }) => {

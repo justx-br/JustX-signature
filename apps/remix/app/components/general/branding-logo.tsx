@@ -9,7 +9,7 @@ export const BrandingLogo = ({ className, ...props }: LogoProps) => {
   return (
     <img
       src={Logo}
-      alt="Justx"
+      alt="JustX"
       className={cn('h-8 w-auto object-contain object-left', className)}
       {...props}
     />
