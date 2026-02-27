@@ -102,11 +102,11 @@ app.use('/api/v2/*', rateLimitMiddleware);
 // Auth server.
 app.route('/api/auth', auth);
 
+// JustX internal provisioning API (creates user + org + team + ApiToken).
+app.route('/api/internal/justx', justxCreateUserRoute);
+
 // Files route.
 app.route('/api/files', filesRoute);
-
-// JustX internal provisioning (create Documenso user from JustX signup).
-app.route('/api/internal/justx', justxCreateUserRoute);
 
 // AI route.
 app.use('/api/ai/*', aiRateLimitMiddleware);
@@ -147,7 +147,10 @@ if (env('NODE_ENV') !== 'development') {
 }
 
 // Start license client to verify license on startup.
-void LicenseClient.start();
+// Avoid noisy NOT_FOUND logs in development when no license key is configured.
+if (env('NEXT_PRIVATE_DOCUMENSO_LICENSE_KEY')) {
+  void LicenseClient.start();
+}
 
 // Initialize admin user from environment variables.
 void AdminUserInitializer.start();

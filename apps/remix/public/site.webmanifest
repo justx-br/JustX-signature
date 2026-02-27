@@ -1,18 +1,7 @@
 {
   "name": "Justx",
   "short_name": "Justx",
-  "icons": [
-    {
-      "src": "/android-chrome-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/android-chrome-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ],
+  "icons": [],
   "theme_color": "#221E1D",
   "background_color": "#FFFFFF",
   "display": "standalone"

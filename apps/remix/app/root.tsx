@@ -27,16 +27,7 @@ import { langCookie } from './storage/lang-cookie.server';
 import { themeSessionResolver } from './storage/theme-session.server';
 import { appMetaTags } from './utils/meta';
 
-const FAVICON_VERSION = '4';
-
-export const links: Route.LinksFunction = () => [
-  { rel: 'stylesheet', href: stylesheet },
-  { rel: 'icon', type: 'image/png', sizes: '192x192', href: `/android-chrome-192x192.png?v=${FAVICON_VERSION}` },
-  { rel: 'icon', type: 'image/png', href: `/favicon-32x32.png?v=${FAVICON_VERSION}` },
-  { rel: 'apple-touch-icon', sizes: '180x180', href: `/apple-touch-icon.png?v=${FAVICON_VERSION}` },
-  { rel: 'icon', type: 'image/png', sizes: '32x32', href: `/favicon-32x32.png?v=${FAVICON_VERSION}` },
-  { rel: 'icon', type: 'image/png', sizes: '16x16', href: `/favicon-16x16.png?v=${FAVICON_VERSION}` },
-];
+export const links: Route.LinksFunction = () => [{ rel: 'stylesheet', href: stylesheet }];
 
 export function meta() {
   return appMetaTags();
