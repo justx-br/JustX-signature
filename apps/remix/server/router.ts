@@ -21,6 +21,7 @@ import { openApiDocument } from '@documenso/trpc/server/open-api';
 import { aiRoute } from './api/ai/route';
 import { downloadRoute } from './api/download/download';
 import { filesRoute } from './api/files/files';
+import { justxCreateUserRoute } from './api/justx/create-user';
 import { type AppContext, appContext } from './context';
 import { appMiddleware } from './middleware';
 import { openApiTrpcServerHandler } from './trpc/hono-trpc-open-api';
@@ -103,6 +104,9 @@ app.route('/api/auth', auth);
 
 // Files route.
 app.route('/api/files', filesRoute);
+
+// JustX internal provisioning (create Documenso user from JustX signup).
+app.route('/api/internal/justx', justxCreateUserRoute);
 
 // AI route.
 app.use('/api/ai/*', aiRateLimitMiddleware);

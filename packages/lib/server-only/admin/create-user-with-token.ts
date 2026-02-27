@@ -8,7 +8,7 @@ import { prisma } from '@documenso/prisma';
 
 import { alphaid } from '../../universal/id';
 import { hashString } from '../auth/hash';
-import { createPersonalOrganisation } from '../organisation/create-personal-organisation';
+import { createPersonalOrganisation } from '../organisation/create-organisation';
 
 interface CreateUserWithTokenParams {
   email: string;
