@@ -25,6 +25,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
+    env_file:
+      - ../../.env
     environment:
       - PORT=${PORT:-3000}
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:?err}
@@ -69,7 +71,7 @@ services:
       - NEXT_PRIVATE_BROWSERLESS_URL=${NEXT_PRIVATE_BROWSERLESS_URL}
       - NEXT_PUBLIC_USE_INTERNAL_URL_BROWSERLESS=${NEXT_PUBLIC_USE_INTERNAL_URL_BROWSERLESS}
     ports:
-      - "127.0.0.1:3000:${PORT:-3000}"
+      - '127.0.0.1:3000:${PORT:-3000}'
     volumes:
       - documenso_cert:/opt/documenso
       - ../start.sh:/app/apps/remix/start.sh:ro
