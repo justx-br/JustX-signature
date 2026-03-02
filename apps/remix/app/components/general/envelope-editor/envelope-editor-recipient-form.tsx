@@ -25,6 +25,7 @@ import { useSession } from '@documenso/lib/client-only/providers/session';
 import type { TDetectedRecipientSchema } from '@documenso/lib/server-only/ai/envelope/detect-recipients/schema';
 import { ZRecipientAuthOptionsSchema } from '@documenso/lib/types/document-auth';
 import { nanoid } from '@documenso/lib/universal/id';
+import { isAdmin } from '@documenso/lib/utils/is-admin';
 import { canRecipientBeModified as utilCanRecipientBeModified } from '@documenso/lib/utils/recipients';
 import { trpc } from '@documenso/trpc/react';
 import { AnimateGenericFadeInOut } from '@documenso/ui/components/animate/animate-generic-fade-in-out';
@@ -73,6 +74,7 @@ export const EnvelopeEditorRecipientForm = () => {
   const { toast } = useToast();
   const { remaining } = useLimits();
   const { user } = useSession();
+  const isUserAdmin = isAdmin(user);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [recipientSearchQuery, setRecipientSearchQuery] = useState('');
@@ -603,27 +605,29 @@ export const EnvelopeEditorRecipientForm = () => {
         </div>
 
         <div className="flex flex-row items-center space-x-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                type="button"
-                size="sm"
-                disabled={isSubmitting}
-                onClick={onDetectRecipientsClick}
-              >
-                <SparklesIcon className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
+          {isUserAdmin && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  type="button"
+                  size="sm"
+                  disabled={isSubmitting}
+                  onClick={onDetectRecipientsClick}
+                >
+                  <SparklesIcon className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
 
-            <TooltipContent>
-              {team.preferences.aiFeaturesEnabled ? (
-                <Trans>Detect recipients with AI</Trans>
-              ) : (
-                <Trans>Enable AI detection</Trans>
-              )}
-            </TooltipContent>
-          </Tooltip>
+              <TooltipContent>
+                {team.preferences.aiFeaturesEnabled ? (
+                  <Trans>Detect recipients with AI</Trans>
+                ) : (
+                  <Trans>Enable AI detection</Trans>
+                )}
+              </TooltipContent>
+            </Tooltip>
+          )}
 
           <Button
             variant="outline"

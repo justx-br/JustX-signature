@@ -23,6 +23,7 @@ import {
   type TDocumentMetaDateFormat,
   ZDocumentMetaTimezoneSchema,
 } from '@documenso/lib/types/document-meta';
+import { isAdmin } from '@documenso/lib/utils/is-admin';
 import { isPersonalLayout } from '@documenso/lib/utils/organisations';
 import { recipientAbbreviation } from '@documenso/lib/utils/recipient-formatter';
 import { extractTeamSignatureSettings } from '@documenso/lib/utils/teams';
@@ -109,6 +110,7 @@ export const DocumentPreferencesForm = ({
 
   const isPersonalLayoutMode = isPersonalLayout(organisations);
   const isPersonalOrganisation = currentOrganisation.type === OrganisationType.PERSONAL;
+  const isUserAdmin = isAdmin(user);
 
   const placeholderEmail = user.email ?? 'user@example.com';
 
@@ -669,7 +671,7 @@ export const DocumentPreferencesForm = ({
             )}
           />
 
-          {isAiFeaturesConfigured && (
+          {isAiFeaturesConfigured && isUserAdmin && (
             <FormField
               control={form.control}
               name="aiFeaturesEnabled"

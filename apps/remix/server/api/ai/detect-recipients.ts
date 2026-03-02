@@ -7,6 +7,7 @@ import { IS_AI_FEATURES_CONFIGURED } from '@documenso/lib/constants/app';
 import { AppError, AppErrorCode } from '@documenso/lib/errors/app-error';
 import { detectRecipientsFromEnvelope } from '@documenso/lib/server-only/ai/envelope/detect-recipients';
 import { getTeamById } from '@documenso/lib/server-only/team/get-team';
+import { isAdmin } from '@documenso/lib/utils/is-admin';
 
 import type { HonoEnv } from '../../router';
 import { ZDetectRecipientsRequestSchema } from './detect-recipients.types';
@@ -27,6 +28,13 @@ export const detectRecipientsRoute = new Hono<HonoEnv>().post(
       if (!session.user) {
         throw new AppError(AppErrorCode.UNAUTHORIZED, {
           message: 'You must be logged in to detect recipients',
+        });
+      }
+
+      // Check if user is admin
+      if (!isAdmin(session.user)) {
+        throw new AppError(AppErrorCode.UNAUTHORIZED, {
+          message: 'AI features are only available to admin users',
         });
       }
 

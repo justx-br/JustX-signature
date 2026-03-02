@@ -4,6 +4,7 @@ import { OrganisationType } from '@prisma/client';
 import { ORGANISATION_MEMBER_ROLE_PERMISSIONS_MAP } from '@documenso/lib/constants/organisations';
 import { TEAM_MEMBER_ROLE_PERMISSIONS_MAP } from '@documenso/lib/constants/teams';
 import { AppError, AppErrorCode } from '@documenso/lib/errors/app-error';
+import { isAdmin } from '@documenso/lib/utils/is-admin';
 import { buildOrganisationWhereQuery } from '@documenso/lib/utils/organisations';
 import { buildTeamWhereQuery } from '@documenso/lib/utils/teams';
 import { prisma } from '@documenso/prisma';
@@ -62,6 +63,13 @@ export const updateTeamSettingsRoute = authenticatedProcedure
     if (Object.values(data).length === 0) {
       throw new AppError(AppErrorCode.INVALID_BODY, {
         message: 'No settings to update',
+      });
+    }
+
+    // Check if user is trying to update AI features setting without admin privileges
+    if (aiFeaturesEnabled !== undefined && !isAdmin(user)) {
+      throw new AppError(AppErrorCode.UNAUTHORIZED, {
+        message: 'Only admin users can enable or disable AI features',
       });
     }
 

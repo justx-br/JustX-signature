@@ -1,7 +1,7 @@
 import { Link, Outlet } from 'react-router';
 
-import Logo from '@documenso/assets/logo.svg';
 import backgroundPattern from '@documenso/assets/images/background-pattern.png';
+import Logo from '@documenso/assets/logo.svg';
 
 export default function Layout() {
   return (
@@ -20,7 +20,10 @@ export default function Layout() {
         </div>
 
         <div className="relative flex w-full flex-col items-center gap-8">
-          <Link to="/" className="focus-visible:ring-ring ring-offset-background flex items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
+          <Link
+            to="/"
+            className="relative z-20 flex items-center rounded-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
             <img
               src={Logo}
               alt="Justx"

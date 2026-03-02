@@ -12,6 +12,7 @@ import { match } from 'ts-pattern';
 
 import { useCurrentEnvelopeEditor } from '@documenso/lib/client-only/providers/envelope-editor-provider';
 import { useCurrentEnvelopeRender } from '@documenso/lib/client-only/providers/envelope-render-provider';
+import { useSession } from '@documenso/lib/client-only/providers/session';
 import type { NormalizedFieldWithContext } from '@documenso/lib/server-only/ai/envelope/detect-fields/types';
 import {
   FIELD_META_DEFAULT_VALUES,
@@ -27,6 +28,7 @@ import {
   type TSignatureFieldMeta,
   type TTextFieldMeta,
 } from '@documenso/lib/types/field-meta';
+import { isAdmin } from '@documenso/lib/utils/is-admin';
 import { canRecipientFieldsBeModified } from '@documenso/lib/utils/recipients';
 import { AnimateGenericFadeInOut } from '@documenso/ui/components/animate/animate-generic-fade-in-out';
 import PDFViewerKonvaLazy from '@documenso/ui/components/pdf-viewer/pdf-viewer-konva-lazy';
@@ -74,6 +76,8 @@ export const EnvelopeEditorFieldsPage = () => {
   const [searchParams] = useSearchParams();
 
   const team = useCurrentTeam();
+  const { user } = useSession();
+  const isUserAdmin = isAdmin(user);
 
   const { envelope, editorFields, relativePath } = useCurrentEnvelopeEditor();
 
@@ -249,22 +253,24 @@ export const EnvelopeEditorFieldsPage = () => {
               selectedEnvelopeItemId={currentEnvelopeItem?.id ?? null}
             />
 
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="mt-4 w-full"
-              onClick={onDetectClick}
-              disabled={envelope.status !== DocumentStatus.DRAFT}
-              title={
-                envelope.status !== DocumentStatus.DRAFT
-                  ? _(msg`You can only detect fields in draft envelopes`)
-                  : undefined
-              }
-            >
-              <SparklesIcon className="-ml-1 mr-2 h-4 w-4" />
-              <Trans>Detect with AI</Trans>
-            </Button>
+            {isUserAdmin && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-4 w-full"
+                onClick={onDetectClick}
+                disabled={envelope.status !== DocumentStatus.DRAFT}
+                title={
+                  envelope.status !== DocumentStatus.DRAFT
+                    ? _(msg`You can only detect fields in draft envelopes`)
+                    : undefined
+                }
+              >
+                <SparklesIcon className="-ml-1 mr-2 h-4 w-4" />
+                <Trans>Detect with AI</Trans>
+              </Button>
+            )}
 
             <AiFieldDetectionDialog
               open={isAiFieldDialogOpen}

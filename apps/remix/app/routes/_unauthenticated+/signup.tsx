@@ -1,5 +1,6 @@
 import { redirect } from 'react-router';
 
+import { getOptionalSession } from '@documenso/auth/server/lib/utils/get-session';
 import {
   IS_GOOGLE_SSO_ENABLED,
   IS_MICROSOFT_SSO_ENABLED,
@@ -17,13 +18,19 @@ export function meta() {
   return appMetaTags('Sign Up');
 }
 
-export function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request }: Route.LoaderArgs) {
+  const { isAuthenticated } = await getOptionalSession(request);
   const NEXT_PUBLIC_DISABLE_SIGNUP = env('NEXT_PUBLIC_DISABLE_SIGNUP');
 
   // SSR env variables.
   const isGoogleSSOEnabled = IS_GOOGLE_SSO_ENABLED;
   const isMicrosoftSSOEnabled = IS_MICROSOFT_SSO_ENABLED;
   const isOIDCSSOEnabled = IS_OIDC_SSO_ENABLED;
+
+  if (isAuthenticated) {
+    // If already authenticated, redirect to documents area.
+    throw redirect('/');
+  }
 
   if (NEXT_PUBLIC_DISABLE_SIGNUP === 'true') {
     throw redirect('/signin');
@@ -46,7 +53,7 @@ export default function SignUp({ loaderData }: Route.ComponentProps) {
 
   return (
     <SignUpForm
-      className="w-screen max-w-screen-2xl px-4 md:px-16 lg:-my-16"
+      className="w-screen max-w-screen-2xl px-4 md:px-16"
       isGoogleSSOEnabled={isGoogleSSOEnabled}
       isMicrosoftSSOEnabled={isMicrosoftSSOEnabled}
       isOIDCSSOEnabled={isOIDCSSOEnabled}
