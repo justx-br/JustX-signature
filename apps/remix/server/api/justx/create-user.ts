@@ -88,10 +88,21 @@ export const justxCreateUserRoute = new Hono<HonoEnv>().post('/create-user', asy
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     log.warn({
-      msg: 'JustX provisioning 422',
+      msg: 'JustX provisioning failed',
       email: String(email).trim().toLowerCase(),
       details: message,
+      stack: err instanceof Error ? err.stack : undefined,
     });
-    return c.json({ error: 'Failed to create user', details: message }, 422);
+
+    // Only expose error details in development mode
+    const response: { error: string; details?: string } = {
+      error: 'Failed to create user',
+    };
+
+    if (process.env.NODE_ENV === 'development') {
+      response.details = message;
+    }
+
+    return c.json(response, 422);
   }
 });

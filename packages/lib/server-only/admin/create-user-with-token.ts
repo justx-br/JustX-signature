@@ -71,9 +71,7 @@ export async function createUserWithToken(
     const existingToken = existingUser.apiTokens.find((token) => token.teamId === team.id);
 
     if (existingToken) {
-      throw new Error(
-        `User ${email} already exists and has an API token. Cannot return existing token.`,
-      );
+      throw new Error('User provisioning failed. Please contact support.');
     }
 
     // Create token for existing user
