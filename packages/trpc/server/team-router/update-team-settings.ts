@@ -67,7 +67,7 @@ export const updateTeamSettingsRoute = authenticatedProcedure
     }
 
     // Check if user is trying to update AI features setting without admin privileges
-    if (aiFeaturesEnabled !== undefined && !isAdmin(user)) {
+    if (aiFeaturesEnabled !== undefined && user && 'roles' in user && !isAdmin(user)) {
       throw new AppError(AppErrorCode.UNAUTHORIZED, {
         message: 'Only admin users can enable or disable AI features',
       });
