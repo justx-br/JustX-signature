@@ -9,6 +9,7 @@ import {
   DownloadCloudIcon,
   EyeIcon,
   LinkIcon,
+  MenuIcon,
   MousePointer,
   SendIcon,
   SettingsIcon,
@@ -25,8 +26,10 @@ import {
   mapSecondaryIdToTemplateId,
 } from '@documenso/lib/utils/envelope';
 import { AnimateGenericFadeInOut } from '@documenso/ui/components/animate/animate-generic-fade-in-out';
+import { cn } from '@documenso/ui/lib/utils';
 import { Button } from '@documenso/ui/primitives/button';
 import { Separator } from '@documenso/ui/primitives/separator';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@documenso/ui/primitives/sheet';
 import { SpinnerBox } from '@documenso/ui/primitives/spinner';
 
 import { DocumentDeleteDialog } from '~/components/dialogs/document-delete-dialog';
@@ -69,6 +72,250 @@ const envelopeEditorSteps = [
   },
 ];
 
+type EnvelopeEditorLeftSidebarProps = {
+  envelope: ReturnType<typeof useCurrentEnvelopeEditor>['envelope'];
+  isDocument: boolean;
+  isTemplate: boolean;
+  currentStep: EnvelopeEditorStep;
+  currentStepData: (typeof envelopeEditorSteps)[number];
+  relativePath: ReturnType<typeof useCurrentEnvelopeEditor>['relativePath'];
+  isDeleteDialogOpen: boolean;
+  setDeleteDialogOpen: (open: boolean) => void;
+  navigateToStep: (step: EnvelopeEditorStep) => void;
+  onAfterStepClick?: () => void;
+  navigate: ReturnType<typeof useNavigate>;
+  syncEnvelope: () => Promise<void>;
+};
+
+const EnvelopeEditorLeftSidebar = ({
+  envelope,
+  isDocument,
+  isTemplate,
+  currentStep,
+  currentStepData,
+  relativePath,
+  isDeleteDialogOpen,
+  setDeleteDialogOpen,
+  navigateToStep,
+  onAfterStepClick,
+  navigate,
+  syncEnvelope,
+}: EnvelopeEditorLeftSidebarProps) => {
+  const { t } = useLingui();
+
+  return (
+    <div className="flex flex-col overflow-y-auto py-4">
+      <div className="px-4">
+        <h3 className="flex items-end justify-between text-sm font-semibold text-foreground">
+          {isDocument ? <Trans>Document Editor</Trans> : <Trans>Template Editor</Trans>}
+
+          <span className="ml-2 rounded border bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground">
+            <Trans context="The step counter">
+              Step {currentStepData.order}/{envelopeEditorSteps.length}
+            </Trans>
+          </span>
+        </h3>
+
+        <div className="relative my-4 h-[4px] rounded-md bg-muted">
+          <motion.div
+            layout="size"
+            layoutId="document-flow-container-step-mobile"
+            className="absolute inset-y-0 left-0 bg-primary"
+            style={{
+              width: `${(100 / envelopeEditorSteps.length) * (currentStepData.order ?? 0)}%`,
+            }}
+          />
+        </div>
+
+        <div className="space-y-3">
+          {envelopeEditorSteps.map((step) => {
+            const Icon = step.icon;
+            const isActive = currentStep === step.id;
+
+            return (
+              <div
+                key={step.id}
+                className={`cursor-pointer rounded-lg p-3 transition-colors ${
+                  isActive
+                    ? 'border border-green-200 bg-green-50 dark:border-green-500/20 dark:bg-green-500/10'
+                    : 'border border-gray-200 hover:bg-gray-50 dark:border-gray-400/20 dark:hover:bg-gray-400/10'
+                }`}
+                onClick={() => {
+                  navigateToStep(step.id as EnvelopeEditorStep);
+                  onAfterStepClick?.();
+                }}
+              >
+                <div className="flex items-center space-x-3">
+                  <div
+                    className={`rounded border p-2 ${
+                      isActive
+                        ? 'border-green-200 bg-green-50 dark:border-green-500/20 dark:bg-green-500/10'
+                        : 'border-gray-100 bg-gray-100 dark:border-gray-400/20 dark:bg-gray-400/10'
+                    }`}
+                  >
+                    <Icon className={`h-4 w-4 ${isActive ? 'text-green-600' : 'text-gray-600'}`} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div
+                      className={`truncate text-sm font-medium ${
+                        isActive
+                          ? 'text-green-900 dark:text-green-400'
+                          : 'text-foreground dark:text-muted-foreground'
+                      }`}
+                    >
+                      {t(step.title)}
+                    </div>
+                    <div className="truncate text-xs text-muted-foreground">
+                      {t(step.description)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <Separator className="my-6" />
+
+      <div className="space-y-3 px-4">
+        <h4 className="text-sm font-semibold text-foreground">
+          <Trans>Quick Actions</Trans>
+        </h4>
+        <EnvelopeEditorSettingsDialog
+          trigger={
+            <Button variant="ghost" size="sm" className="w-full justify-start">
+              <SettingsIcon className="mr-2 h-4 w-4 shrink-0" />
+              <span className="truncate">
+                {isDocument ? <Trans>Document Settings</Trans> : <Trans>Template Settings</Trans>}
+              </span>
+            </Button>
+          }
+        />
+
+        {isDocument && (
+          <EnvelopeDistributeDialog
+            documentRootPath={relativePath.documentRootPath}
+            trigger={
+              <Button variant="ghost" size="sm" className="w-full justify-start">
+                <SendIcon className="mr-2 h-4 w-4 shrink-0" />
+                <span className="truncate">
+                  <Trans>Send Document</Trans>
+                </span>
+              </Button>
+            }
+          />
+        )}
+
+        {isDocument && (
+          <EnvelopeRedistributeDialog
+            envelope={envelope}
+            trigger={
+              <Button variant="ghost" size="sm" className="w-full justify-start">
+                <SendIcon className="mr-2 h-4 w-4 shrink-0" />
+                <span className="truncate">
+                  <Trans>Resend Document</Trans>
+                </span>
+              </Button>
+            }
+          />
+        )}
+
+        {isTemplate && (
+          <TemplateDirectLinkDialog
+            templateId={mapSecondaryIdToTemplateId(envelope.secondaryId)}
+            directLink={envelope.directLink}
+            recipients={envelope.recipients}
+            onCreateSuccess={async () => await syncEnvelope()}
+            onDeleteSuccess={async () => await syncEnvelope()}
+            trigger={
+              <Button variant="ghost" size="sm" className="w-full justify-start">
+                <LinkIcon className="mr-2 h-4 w-4 shrink-0" />
+                <span className="truncate">
+                  <Trans>Direct Link</Trans>
+                </span>
+              </Button>
+            }
+          />
+        )}
+
+        <EnvelopeDuplicateDialog
+          envelopeId={envelope.id}
+          envelopeType={envelope.type}
+          trigger={
+            <Button variant="ghost" size="sm" className="w-full justify-start">
+              <CopyPlusIcon className="mr-2 h-4 w-4 shrink-0" />
+              <span className="truncate">
+                {isDocument ? <Trans>Duplicate Document</Trans> : <Trans>Duplicate Template</Trans>}
+              </span>
+            </Button>
+          }
+        />
+
+        <EnvelopeDownloadDialog
+          envelopeId={envelope.id}
+          envelopeStatus={envelope.status}
+          envelopeItems={envelope.envelopeItems}
+          trigger={
+            <Button variant="ghost" size="sm" className="w-full justify-start">
+              <DownloadCloudIcon className="mr-2 h-4 w-4 shrink-0" />
+              <span className="truncate">
+                <Trans>Download PDF</Trans>
+              </span>
+            </Button>
+          }
+        />
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start"
+          onClick={() => setDeleteDialogOpen(true)}
+        >
+          <Trash2Icon className="mr-2 h-4 w-4 shrink-0" />
+          <span className="truncate">
+            {isDocument ? <Trans>Delete Document</Trans> : <Trans>Delete Template</Trans>}
+          </span>
+        </Button>
+      </div>
+
+      {isDocument ? (
+        <DocumentDeleteDialog
+          id={mapSecondaryIdToDocumentId(envelope.secondaryId)}
+          status={envelope.status}
+          documentTitle={envelope.title}
+          canManageDocument={true}
+          open={isDeleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          onDelete={async () => {
+            await navigate(relativePath.documentRootPath);
+          }}
+        />
+      ) : (
+        <TemplateDeleteDialog
+          id={mapSecondaryIdToTemplateId(envelope.secondaryId)}
+          open={isDeleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          onDelete={async () => {
+            await navigate(relativePath.templateRootPath);
+          }}
+        />
+      )}
+
+      <div className="mt-auto px-4 pt-4">
+        <Button variant="ghost" className="w-full justify-start" asChild>
+          <Link to={relativePath.basePath}>
+            <ArrowLeftIcon className="mr-2 h-4 w-4 shrink-0" />
+            <span className="truncate">
+              {isDocument ? <Trans>Return to documents</Trans> : <Trans>Return to templates</Trans>}
+            </span>
+          </Link>
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 export default function EnvelopeEditor() {
   const { t } = useLingui();
 
@@ -87,6 +334,7 @@ export default function EnvelopeEditor() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isStepLoading, setIsStepLoading] = useState(false);
+  const [isLeftSheetOpen, setIsLeftSheetOpen] = useState(false);
 
   const [currentStep, setCurrentStep] = useState<EnvelopeEditorStep>(() => {
     const searchParamStep = searchParams.get('step') as EnvelopeEditorStep | undefined;
@@ -152,221 +400,70 @@ export default function EnvelopeEditor() {
     envelopeEditorSteps.find((step) => step.id === currentStep) || envelopeEditorSteps[0];
 
   return (
-    <div className="h-screen w-screen bg-gray-50 dark:bg-background">
+    <div className="h-screen w-screen overflow-x-hidden bg-gray-50 dark:bg-background">
       <EnvelopeEditorHeader />
 
       {/* Main Content Area */}
-      <div className="flex h-[calc(100vh-4rem)] w-screen">
-        {/* Left Section - Step Navigation */}
-        <div className="flex w-80 flex-shrink-0 flex-col overflow-y-auto border-r border-border bg-background py-4">
-          {/* Left section step selector. */}
-          <div className="px-4">
-            <h3 className="flex items-end justify-between text-sm font-semibold text-foreground">
-              {isDocument ? <Trans>Document Editor</Trans> : <Trans>Template Editor</Trans>}
-
-              <span className="ml-2 rounded border bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground">
-                <Trans context="The step counter">
-                  Step {currentStepData.order}/{envelopeEditorSteps.length}
-                </Trans>
-              </span>
-            </h3>
-
-            <div className="relative my-4 h-[4px] rounded-md bg-muted">
-              <motion.div
-                layout="size"
-                layoutId="document-flow-container-step"
-                className="absolute inset-y-0 left-0 bg-primary"
-                style={{
-                  width: `${(100 / envelopeEditorSteps.length) * (currentStepData.order ?? 0)}%`,
-                }}
-              />
-            </div>
-
-            <div className="space-y-3">
-              {envelopeEditorSteps.map((step) => {
-                const Icon = step.icon;
-                const isActive = currentStep === step.id;
-
-                return (
-                  <div
-                    key={step.id}
-                    className={`cursor-pointer rounded-lg p-3 transition-colors ${
-                      isActive
-                        ? 'border border-green-200 bg-green-50 dark:border-green-500/20 dark:bg-green-500/10'
-                        : 'border border-gray-200 hover:bg-gray-50 dark:border-gray-400/20 dark:hover:bg-gray-400/10'
-                    }`}
-                    onClick={() => navigateToStep(step.id as EnvelopeEditorStep)}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div
-                        className={`rounded border p-2 ${
-                          isActive
-                            ? 'border-green-200 bg-green-50 dark:border-green-500/20 dark:bg-green-500/10'
-                            : 'border-gray-100 bg-gray-100 dark:border-gray-400/20 dark:bg-gray-400/10'
-                        }`}
-                      >
-                        <Icon
-                          className={`h-4 w-4 ${isActive ? 'text-green-600' : 'text-gray-600'}`}
-                        />
-                      </div>
-                      <div>
-                        <div
-                          className={`text-sm font-medium ${
-                            isActive
-                              ? 'text-green-900 dark:text-green-400'
-                              : 'text-foreground dark:text-muted-foreground'
-                          }`}
-                        >
-                          {t(step.title)}
-                        </div>
-                        <div className="text-xs text-muted-foreground">{t(step.description)}</div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <Separator className="my-6" />
-
-          {/* Quick Actions. */}
-          <div className="space-y-3 px-4">
-            <h4 className="text-sm font-semibold text-foreground">
-              <Trans>Quick Actions</Trans>
-            </h4>
-            <EnvelopeEditorSettingsDialog
-              trigger={
-                <Button variant="ghost" size="sm" className="w-full justify-start">
-                  <SettingsIcon className="mr-2 h-4 w-4" />
-                  {isDocument ? <Trans>Document Settings</Trans> : <Trans>Template Settings</Trans>}
-                </Button>
-              }
-            />
-
-            {isDocument && (
-              <EnvelopeDistributeDialog
-                documentRootPath={relativePath.documentRootPath}
-                trigger={
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
-                    <SendIcon className="mr-2 h-4 w-4" />
-                    <Trans>Send Document</Trans>
-                  </Button>
-                }
-              />
-            )}
-
-            {isDocument && (
-              <EnvelopeRedistributeDialog
-                envelope={envelope}
-                trigger={
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
-                    <SendIcon className="mr-2 h-4 w-4" />
-                    <Trans>Resend Document</Trans>
-                  </Button>
-                }
-              />
-            )}
-
-            {/* <Button variant="ghost" size="sm" className="w-full justify-start">
-              <FileText className="mr-2 h-4 w-4" />
-              Save as Template
-            </Button> */}
-
-            {isTemplate && (
-              <TemplateDirectLinkDialog
-                templateId={mapSecondaryIdToTemplateId(envelope.secondaryId)}
-                directLink={envelope.directLink}
-                recipients={envelope.recipients}
-                onCreateSuccess={async () => await syncEnvelope()}
-                onDeleteSuccess={async () => await syncEnvelope()}
-                trigger={
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
-                    <LinkIcon className="mr-2 h-4 w-4" />
-                    <Trans>Direct Link</Trans>
-                  </Button>
-                }
-              />
-            )}
-
-            <EnvelopeDuplicateDialog
-              envelopeId={envelope.id}
-              envelopeType={envelope.type}
-              trigger={
-                <Button variant="ghost" size="sm" className="w-full justify-start">
-                  <CopyPlusIcon className="mr-2 h-4 w-4" />
-                  {isDocument ? (
-                    <Trans>Duplicate Document</Trans>
-                  ) : (
-                    <Trans>Duplicate Template</Trans>
-                  )}
-                </Button>
-              }
-            />
-
-            <EnvelopeDownloadDialog
-              envelopeId={envelope.id}
-              envelopeStatus={envelope.status}
-              envelopeItems={envelope.envelopeItems}
-              trigger={
-                <Button variant="ghost" size="sm" className="w-full justify-start">
-                  <DownloadCloudIcon className="mr-2 h-4 w-4" />
-                  <Trans>Download PDF</Trans>
-                </Button>
-              }
-            />
-
+      <div className="relative flex h-[calc(100vh-4rem)] w-full min-w-0">
+        {/* Mobile: Menu button to open left sidebar */}
+        <Sheet open={isLeftSheetOpen} onOpenChange={setIsLeftSheetOpen}>
+          <SheetTrigger asChild>
             <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start"
-              onClick={() => setDeleteDialogOpen(true)}
+              variant="outline"
+              size="icon"
+              className={cn('absolute left-4 top-4 z-10 lg:hidden')}
+              aria-label={t`Open menu`}
             >
-              <Trash2Icon className="mr-2 h-4 w-4" />
-              {isDocument ? <Trans>Delete Document</Trans> : <Trans>Delete Template</Trans>}
+              <MenuIcon className="h-5 w-5" />
             </Button>
-          </div>
-
-          {isDocument ? (
-            <DocumentDeleteDialog
-              id={mapSecondaryIdToDocumentId(envelope.secondaryId)}
-              status={envelope.status}
-              documentTitle={envelope.title}
-              canManageDocument={true}
-              open={isDeleteDialogOpen}
-              onOpenChange={setDeleteDialogOpen}
-              onDelete={async () => {
-                await navigate(relativePath.documentRootPath);
-              }}
+          </SheetTrigger>
+          <SheetContent
+            position="left"
+            size="xl"
+            className="flex w-full max-w-[320px] flex-col overflow-y-auto p-0 [&>button]:hidden"
+          >
+            <SheetTitle className="sr-only">
+              {isDocument ? t`Document Editor` : t`Template Editor`}
+            </SheetTitle>
+            <EnvelopeEditorLeftSidebar
+              envelope={envelope}
+              isDocument={isDocument}
+              isTemplate={isTemplate}
+              currentStep={currentStep}
+              currentStepData={currentStepData}
+              relativePath={relativePath}
+              isDeleteDialogOpen={isDeleteDialogOpen}
+              setDeleteDialogOpen={setDeleteDialogOpen}
+              navigateToStep={navigateToStep}
+              onAfterStepClick={() => setIsLeftSheetOpen(false)}
+              navigate={navigate}
+              syncEnvelope={syncEnvelope}
             />
-          ) : (
-            <TemplateDeleteDialog
-              id={mapSecondaryIdToTemplateId(envelope.secondaryId)}
-              open={isDeleteDialogOpen}
-              onOpenChange={setDeleteDialogOpen}
-              onDelete={async () => {
-                await navigate(relativePath.templateRootPath);
-              }}
-            />
-          )}
+          </SheetContent>
+        </Sheet>
 
-          {/* Footer of left sidebar. */}
-          <div className="mt-auto px-4">
-            <Button variant="ghost" className="w-full justify-start" asChild>
-              <Link to={relativePath.basePath}>
-                <ArrowLeftIcon className="mr-2 h-4 w-4" />
-                {isDocument ? (
-                  <Trans>Return to documents</Trans>
-                ) : (
-                  <Trans>Return to templates</Trans>
-                )}
-              </Link>
-            </Button>
-          </div>
+        {/* Left Section - Step Navigation (hidden on mobile) */}
+        <div className="hidden w-80 flex-shrink-0 flex-col overflow-y-auto border-r border-border bg-background lg:flex">
+          <EnvelopeEditorLeftSidebar
+            envelope={envelope}
+            isDocument={isDocument}
+            isTemplate={isTemplate}
+            currentStep={currentStep}
+            currentStepData={currentStepData}
+            relativePath={relativePath}
+            isDeleteDialogOpen={isDeleteDialogOpen}
+            setDeleteDialogOpen={setDeleteDialogOpen}
+            navigateToStep={navigateToStep}
+            navigate={navigate}
+            syncEnvelope={syncEnvelope}
+          />
         </div>
 
         {/* Main Content - Changes based on current step */}
-        <AnimateGenericFadeInOut className="flex-1 overflow-y-auto" key={currentStep}>
+        <AnimateGenericFadeInOut
+          className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden"
+          key={currentStep}
+        >
           {match({ currentStep, isStepLoading })
             .with({ isStepLoading: true }, () => <SpinnerBox className="py-32" />)
             .with({ currentStep: 'upload' }, () => <EnvelopeEditorUploadPage />)

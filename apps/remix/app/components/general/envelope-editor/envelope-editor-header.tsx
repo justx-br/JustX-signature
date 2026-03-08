@@ -18,14 +18,13 @@ import { Button } from '@documenso/ui/primitives/button';
 import { Separator } from '@documenso/ui/primitives/separator';
 
 import { EnvelopeRedistributeDialog } from '~/components/dialogs/envelope-redistribute-dialog';
-
-import { EnvelopeDirectSignButton } from './envelope-direct-sign-button';
 import { TemplateUseDialog } from '~/components/dialogs/template-use-dialog';
 import { BrandingLogo } from '~/components/general/branding-logo';
 import { DocumentAttachmentsPopover } from '~/components/general/document/document-attachments-popover';
 import { EnvelopeEditorSettingsDialog } from '~/components/general/envelope-editor/envelope-editor-settings-dialog';
 
 import { TemplateDirectLinkBadge } from '../template/template-direct-link-badge';
+import { EnvelopeDirectSignButton } from './envelope-direct-sign-button';
 import { EnvelopeItemTitleInput } from './envelope-editor-title-input';
 
 export default function EnvelopeEditorHeader() {
