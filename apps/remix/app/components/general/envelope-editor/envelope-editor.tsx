@@ -410,8 +410,8 @@ export default function EnvelopeEditor() {
           <SheetTrigger asChild>
             <Button
               variant="outline"
-              size="icon"
-              className={cn('absolute left-4 top-4 z-10 lg:hidden')}
+              size="sm"
+              className={cn('absolute left-4 top-4 z-10 h-10 w-10 p-0 lg:hidden')}
               aria-label={t`Open menu`}
             >
               <MenuIcon className="h-5 w-5" />
