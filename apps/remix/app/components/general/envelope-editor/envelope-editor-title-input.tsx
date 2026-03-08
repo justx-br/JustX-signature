@@ -53,7 +53,7 @@ export const EnvelopeItemTitleInput = ({
   };
 
   return (
-    <div className="relative">
+    <div className={cn('relative min-w-0 overflow-hidden', className)}>
       {/* Hidden span to measure text width */}
       <span
         ref={measureRef}
@@ -70,10 +70,9 @@ export const EnvelopeItemTitleInput = ({
         value={envelopeItemTitle}
         onChange={(e) => handleTitleChange(e.target.value)}
         disabled={disabled}
-        style={{ width: `${inputWidth}px` }}
+        style={{ width: `${inputWidth}px`, maxWidth: '100%' }}
         className={cn(
-          'text-foreground hover:outline-muted-foreground focus:outline-muted-foreground rounded-sm border-0 bg-transparent p-1 text-sm font-medium outline-none hover:outline hover:outline-1 focus:outline focus:outline-1',
-          className,
+          'max-w-full rounded-sm border-0 bg-transparent p-1 text-sm font-medium text-foreground outline-none hover:outline hover:outline-1 hover:outline-muted-foreground focus:outline focus:outline-1 focus:outline-muted-foreground',
           {
             'outline-red-500': isError,
           },

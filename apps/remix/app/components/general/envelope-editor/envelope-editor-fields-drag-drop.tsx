@@ -129,6 +129,9 @@ export const EnvelopeEditorFieldDragDrop = ({
 
   const setSelectedField = useCallback(
     (field: FieldType | null) => {
+      if (field !== null) {
+        lastSelectionTime.current = Date.now();
+      }
       if (onFieldTypeSelect) {
         onFieldTypeSelect(field);
       }
@@ -170,6 +173,8 @@ export const EnvelopeEditorFieldDragDrop = ({
     width: 0,
   });
 
+  const lastSelectionTime = useRef<number>(0);
+
   const getNormalizedEvent = useCallback((event: MouseEvent | TouchEvent) => {
     const { clientX, clientY, pageX, pageY } = getEventCoords(event);
     const target = (event as MouseEvent).target ?? (event as TouchEvent).target;
@@ -196,9 +201,27 @@ export const EnvelopeEditorFieldDragDrop = ({
     [isWithinPageBounds, getNormalizedEvent],
   );
 
+  const isInteractiveElement = useCallback((target: EventTarget | null) => {
+    if (!target || !(target instanceof Element)) {
+      return false;
+    }
+    return !!target.closest(
+      'button, a, [role="button"], [role="tab"], [data-radix-collection-item], [data-sheet-trigger], [data-radix-popper-content-wrapper], [role="dialog"]',
+    );
+  }, []);
+
   const onPointerUp = useCallback(
     (event: MouseEvent | TouchEvent) => {
       if (!selectedField || !selectedRecipientId || !selectedEnvelopeItemId) {
+        return;
+      }
+
+      const target = (event as MouseEvent).target ?? (event as TouchEvent).target;
+      if (isInteractiveElement(target)) {
+        return;
+      }
+
+      if (Date.now() - lastSelectionTime.current < 300) {
         return;
       }
 
@@ -257,6 +280,7 @@ export const EnvelopeEditorFieldDragDrop = ({
       getPage,
       editorFields,
       getNormalizedEvent,
+      isInteractiveElement,
     ],
   );
 

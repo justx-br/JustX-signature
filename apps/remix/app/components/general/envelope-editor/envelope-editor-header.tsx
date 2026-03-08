@@ -39,27 +39,30 @@ export default function EnvelopeEditorHeader({ menuButton }: EnvelopeEditorHeade
 
   return (
     <nav className="w-full border-b border-border bg-background px-4 py-3 md:px-6">
-      <div className="flex items-center justify-between">
-        <div className="flex min-w-0 flex-1 items-center space-x-4">
+      <div className="flex min-w-0 items-center justify-between gap-4">
+        <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden sm:gap-4">
           {menuButton && <div className="shrink-0 lg:hidden">{menuButton}</div>}
           <Link to="/" className="shrink-0">
             <BrandingLogo className="h-8 w-auto md:h-9" />
           </Link>
-          <Separator orientation="vertical" className="h-6 shrink-0" />
+          <Separator orientation="vertical" className="hidden h-6 shrink-0 sm:block" />
 
-          <div className="flex min-w-0 flex-1 items-center space-x-2">
-            <EnvelopeItemTitleInput
-              disabled={envelope.status !== DocumentStatus.DRAFT}
-              value={envelope.title}
-              onChange={(title) => {
-                updateEnvelope({
-                  data: {
-                    title,
-                  },
-                });
-              }}
-              placeholder={t`Envelope Title`}
-            />
+          <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+            <div className="min-w-0 max-w-[140px] flex-1 overflow-hidden sm:max-w-[220px] md:max-w-[320px] lg:max-w-none">
+              <EnvelopeItemTitleInput
+                className="max-w-full"
+                disabled={envelope.status !== DocumentStatus.DRAFT}
+                value={envelope.title}
+                onChange={(title) => {
+                  updateEnvelope({
+                    data: {
+                      title,
+                    },
+                  });
+                }}
+                placeholder={t`Envelope Title`}
+              />
+            </div>
 
             {envelope.type === EnvelopeType.TEMPLATE && (
               <>
@@ -131,7 +134,7 @@ export default function EnvelopeEditorHeader({ menuButton }: EnvelopeEditorHeade
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex shrink-0 items-center gap-2">
           <DocumentAttachmentsPopover envelopeId={envelope.id} buttonSize="sm" />
 
           <EnvelopeEditorSettingsDialog
