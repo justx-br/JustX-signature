@@ -27,7 +27,11 @@ import { TemplateDirectLinkBadge } from '../template/template-direct-link-badge'
 import { EnvelopeDirectSignButton } from './envelope-direct-sign-button';
 import { EnvelopeItemTitleInput } from './envelope-editor-title-input';
 
-export default function EnvelopeEditorHeader() {
+type EnvelopeEditorHeaderProps = {
+  menuButton?: React.ReactNode;
+};
+
+export default function EnvelopeEditorHeader({ menuButton }: EnvelopeEditorHeaderProps) {
   const { t } = useLingui();
 
   const { envelope, isDocument, isTemplate, updateEnvelope, autosaveError, relativePath } =
@@ -36,13 +40,14 @@ export default function EnvelopeEditorHeader() {
   return (
     <nav className="w-full border-b border-border bg-background px-4 py-3 md:px-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link to="/">
+        <div className="flex min-w-0 flex-1 items-center space-x-4">
+          {menuButton && <div className="shrink-0 lg:hidden">{menuButton}</div>}
+          <Link to="/" className="shrink-0">
             <BrandingLogo className="h-8 w-auto md:h-9" />
           </Link>
-          <Separator orientation="vertical" className="h-6" />
+          <Separator orientation="vertical" className="h-6 shrink-0" />
 
-          <div className="flex items-center space-x-2">
+          <div className="flex min-w-0 flex-1 items-center space-x-2">
             <EnvelopeItemTitleInput
               disabled={envelope.status !== DocumentStatus.DRAFT}
               value={envelope.title}

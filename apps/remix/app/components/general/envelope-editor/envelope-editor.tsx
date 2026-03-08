@@ -26,7 +26,6 @@ import {
   mapSecondaryIdToTemplateId,
 } from '@documenso/lib/utils/envelope';
 import { AnimateGenericFadeInOut } from '@documenso/ui/components/animate/animate-generic-fade-in-out';
-import { cn } from '@documenso/ui/lib/utils';
 import { Button } from '@documenso/ui/primitives/button';
 import { Separator } from '@documenso/ui/primitives/separator';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@documenso/ui/primitives/sheet';
@@ -401,47 +400,48 @@ export default function EnvelopeEditor() {
 
   return (
     <div className="h-screen w-screen overflow-x-hidden bg-gray-50 dark:bg-background">
-      <EnvelopeEditorHeader />
+      <EnvelopeEditorHeader
+        menuButton={
+          <Sheet open={isLeftSheetOpen} onOpenChange={setIsLeftSheetOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-10 w-10 p-0"
+                aria-label={t`Open menu`}
+              >
+                <MenuIcon className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent
+              position="left"
+              size="xl"
+              className="flex w-full max-w-[320px] flex-col overflow-y-auto p-0 [&>button]:hidden"
+            >
+              <SheetTitle className="sr-only">
+                {isDocument ? t`Document Editor` : t`Template Editor`}
+              </SheetTitle>
+              <EnvelopeEditorLeftSidebar
+                envelope={envelope}
+                isDocument={isDocument}
+                isTemplate={isTemplate}
+                currentStep={currentStep}
+                currentStepData={currentStepData}
+                relativePath={relativePath}
+                isDeleteDialogOpen={isDeleteDialogOpen}
+                setDeleteDialogOpen={setDeleteDialogOpen}
+                navigateToStep={navigateToStep}
+                onAfterStepClick={() => setIsLeftSheetOpen(false)}
+                navigate={navigate}
+                syncEnvelope={syncEnvelope}
+              />
+            </SheetContent>
+          </Sheet>
+        }
+      />
 
       {/* Main Content Area */}
       <div className="relative flex h-[calc(100vh-4rem)] w-full min-w-0">
-        {/* Mobile: Menu button to open left sidebar */}
-        <Sheet open={isLeftSheetOpen} onOpenChange={setIsLeftSheetOpen}>
-          <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className={cn('absolute left-4 top-4 z-10 h-10 w-10 p-0 lg:hidden')}
-              aria-label={t`Open menu`}
-            >
-              <MenuIcon className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent
-            position="left"
-            size="xl"
-            className="flex w-full max-w-[320px] flex-col overflow-y-auto p-0 [&>button]:hidden"
-          >
-            <SheetTitle className="sr-only">
-              {isDocument ? t`Document Editor` : t`Template Editor`}
-            </SheetTitle>
-            <EnvelopeEditorLeftSidebar
-              envelope={envelope}
-              isDocument={isDocument}
-              isTemplate={isTemplate}
-              currentStep={currentStep}
-              currentStepData={currentStepData}
-              relativePath={relativePath}
-              isDeleteDialogOpen={isDeleteDialogOpen}
-              setDeleteDialogOpen={setDeleteDialogOpen}
-              navigateToStep={navigateToStep}
-              onAfterStepClick={() => setIsLeftSheetOpen(false)}
-              navigate={navigate}
-              syncEnvelope={syncEnvelope}
-            />
-          </SheetContent>
-        </Sheet>
-
         {/* Left Section - Step Navigation (hidden on mobile) */}
         <div className="hidden w-80 flex-shrink-0 flex-col overflow-y-auto border-r border-border bg-background lg:flex">
           <EnvelopeEditorLeftSidebar

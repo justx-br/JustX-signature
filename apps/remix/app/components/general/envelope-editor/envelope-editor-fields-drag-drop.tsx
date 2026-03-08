@@ -90,17 +90,54 @@ export const fieldButtonList = [
 type EnvelopeEditorFieldDragDropProps = {
   selectedRecipientId: number | null;
   selectedEnvelopeItemId: string | null;
+  /** Controlled mode: when provided, parent owns selection. Used for mobile when Sheet closes. */
+  selectedFieldFromParent?: FieldType | null;
+  /** Called when field type is selected or cleared. Used to close Sheet and persist selection on mobile. */
+  onFieldTypeSelect?: (type: FieldType | null) => void;
+  /** Whether to hide the field type buttons (placement-only mode). Used when buttons are in Sheet. */
+  hideButtons?: boolean;
+};
+
+const getEventCoords = (
+  event: MouseEvent | TouchEvent,
+): { clientX: number; clientY: number; pageX: number; pageY: number } => {
+  if ('touches' in event) {
+    const t = event.changedTouches?.[0] ?? event.touches?.[0];
+    if (t) {
+      return { clientX: t.clientX, clientY: t.clientY, pageX: t.pageX, pageY: t.pageY };
+    }
+  }
+  const e = event as MouseEvent;
+  return { clientX: e.clientX, clientY: e.clientY, pageX: e.pageX, pageY: e.pageY };
 };
 
 export const EnvelopeEditorFieldDragDrop = ({
   selectedRecipientId,
   selectedEnvelopeItemId,
+  selectedFieldFromParent,
+  onFieldTypeSelect,
+  hideButtons = false,
 }: EnvelopeEditorFieldDragDropProps) => {
   const { envelope, editorFields, isTemplate, getRecipientColorKey } = useCurrentEnvelopeEditor();
 
   const { t } = useLingui();
 
-  const [selectedField, setSelectedField] = useState<FieldType | null>(null);
+  const [internalSelectedField, setInternalSelectedField] = useState<FieldType | null>(null);
+
+  const isControlled = selectedFieldFromParent !== undefined;
+  const selectedField = isControlled ? selectedFieldFromParent : internalSelectedField;
+
+  const setSelectedField = useCallback(
+    (field: FieldType | null) => {
+      if (onFieldTypeSelect) {
+        onFieldTypeSelect(field);
+      }
+      if (!isControlled) {
+        setInternalSelectedField(field);
+      }
+    },
+    [isControlled, onFieldTypeSelect],
+  );
 
   const { isWithinPageBounds, getPage } = useDocumentElement();
 
@@ -133,11 +170,18 @@ export const EnvelopeEditorFieldDragDrop = ({
     width: 0,
   });
 
-  const onMouseMove = useCallback(
-    (event: MouseEvent) => {
+  const getNormalizedEvent = useCallback((event: MouseEvent | TouchEvent) => {
+    const { clientX, clientY, pageX, pageY } = getEventCoords(event);
+    const target = (event as MouseEvent).target ?? (event as TouchEvent).target;
+    return { clientX, clientY, pageX, pageY, target } as MouseEvent;
+  }, []);
+
+  const onPointerMove = useCallback(
+    (event: MouseEvent | TouchEvent) => {
+      const e = getNormalizedEvent(event);
       setIsFieldWithinBounds(
         isWithinPageBounds(
-          event,
+          e,
           PDF_VIEWER_PAGE_SELECTOR,
           fieldBounds.current.width,
           fieldBounds.current.height,
@@ -145,25 +189,26 @@ export const EnvelopeEditorFieldDragDrop = ({
       );
 
       setCoords({
-        x: event.clientX - fieldBounds.current.width / 2,
-        y: event.clientY - fieldBounds.current.height / 2,
+        x: e.clientX - fieldBounds.current.width / 2,
+        y: e.clientY - fieldBounds.current.height / 2,
       });
     },
-    [isWithinPageBounds],
+    [isWithinPageBounds, getNormalizedEvent],
   );
 
-  const onMouseClick = useCallback(
-    (event: MouseEvent) => {
+  const onPointerUp = useCallback(
+    (event: MouseEvent | TouchEvent) => {
       if (!selectedField || !selectedRecipientId || !selectedEnvelopeItemId) {
         return;
       }
 
-      const $page = getPage(event, PDF_VIEWER_PAGE_SELECTOR);
+      const e = getNormalizedEvent(event);
+      const $page = getPage(e, PDF_VIEWER_PAGE_SELECTOR);
 
       if (
         !$page ||
         !isWithinPageBounds(
-          event,
+          e,
           PDF_VIEWER_PAGE_SELECTOR,
           fieldBounds.current.width,
           fieldBounds.current.height,
@@ -175,26 +220,14 @@ export const EnvelopeEditorFieldDragDrop = ({
 
       const { top, left, height, width } = getBoundingClientRect($page);
 
-      console.log({
-        top,
-        left,
-        height,
-        width,
-        rawPageX: event.pageX,
-        rawPageY: event.pageY,
-      });
-
       const pageNumber = parseInt($page.getAttribute('data-page-number') ?? '1', 10);
 
-      // Calculate x and y as a percentage of the page width and height
-      let pageX = ((event.pageX - left) / width) * 100;
-      let pageY = ((event.pageY - top) / height) * 100;
+      let pageX = ((e.pageX - left) / width) * 100;
+      let pageY = ((e.pageY - top) / height) * 100;
 
-      // Get the bounds as a percentage of the page width and height
       const fieldPageWidth = (fieldBounds.current.width / width) * 100;
       const fieldPageHeight = (fieldBounds.current.height / height) * 100;
 
-      // And center it based on the bounds
       pageX -= fieldPageWidth / 2;
       pageY -= fieldPageHeight / 2;
 
@@ -223,6 +256,7 @@ export const EnvelopeEditorFieldDragDrop = ({
       selectedEnvelopeItemId,
       getPage,
       editorFields,
+      getNormalizedEvent,
     ],
   );
 
@@ -251,16 +285,30 @@ export const EnvelopeEditorFieldDragDrop = ({
   }, []);
 
   useEffect(() => {
-    if (selectedField) {
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseClick);
+    if (!selectedField) {
+      return;
     }
 
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseClick);
+    const handleMove = (e: MouseEvent | TouchEvent) => {
+      onPointerMove(e);
     };
-  }, [onMouseClick, onMouseMove, selectedField]);
+
+    const handleUp = (e: MouseEvent | TouchEvent) => {
+      onPointerUp(e);
+    };
+
+    window.addEventListener('mousemove', handleMove as EventListener);
+    window.addEventListener('mouseup', handleUp as EventListener);
+    window.addEventListener('touchmove', handleMove, { passive: true });
+    window.addEventListener('touchend', handleUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMove as EventListener);
+      window.removeEventListener('mouseup', handleUp as EventListener);
+      window.removeEventListener('touchmove', handleMove);
+      window.removeEventListener('touchend', handleUp);
+    };
+  }, [onPointerUp, onPointerMove, selectedField]);
 
   const selectedRecipientColor = useMemo(() => {
     return selectedRecipientId ? getRecipientColorKey(selectedRecipientId) : 'green';
@@ -268,45 +316,47 @@ export const EnvelopeEditorFieldDragDrop = ({
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-x-2 gap-y-2.5">
-        {fieldButtonList.map((field) => (
-          <button
-            disabled={isFieldsDisabled}
-            key={field.type}
-            type="button"
-            onClick={() => setSelectedField(field.type)}
-            onMouseDown={() => setSelectedField(field.type)}
-            data-selected={selectedField === field.type ? true : undefined}
-            className={cn(
-              'border-border group flex h-12 cursor-pointer items-center justify-center rounded-lg border px-4 transition-colors',
-              RECIPIENT_COLOR_STYLES[selectedRecipientColor].fieldButton,
-            )}
-          >
-            <p
+      {!hideButtons && (
+        <div className="grid grid-cols-2 gap-x-2 gap-y-2.5">
+          {fieldButtonList.map((field) => (
+            <button
+              disabled={isFieldsDisabled}
+              key={field.type}
+              type="button"
+              onClick={() => setSelectedField(field.type)}
+              onMouseDown={() => setSelectedField(field.type)}
+              data-selected={selectedField === field.type ? true : undefined}
               className={cn(
-                'text-muted-foreground font-noto group-data-[selected]:text-foreground flex items-center justify-center gap-x-1.5 text-sm font-normal',
-                field.className,
-                {
-                  'group-hover:text-recipient-green': selectedRecipientColor === 'green',
-                  'group-hover:text-recipient-blue': selectedRecipientColor === 'blue',
-                  'group-hover:text-recipient-purple': selectedRecipientColor === 'purple',
-                  'group-hover:text-recipient-orange': selectedRecipientColor === 'orange',
-                  'group-hover:text-recipient-yellow': selectedRecipientColor === 'yellow',
-                  'group-hover:text-recipient-pink': selectedRecipientColor === 'pink',
-                },
+                'group flex h-12 cursor-pointer items-center justify-center rounded-lg border border-border px-4 transition-colors',
+                RECIPIENT_COLOR_STYLES[selectedRecipientColor].fieldButton,
               )}
             >
-              {field.type !== FieldType.SIGNATURE && <field.icon className="h-4 w-4" />}
-              {t(field.name)}
-            </p>
-          </button>
-        ))}
-      </div>
+              <p
+                className={cn(
+                  'flex items-center justify-center gap-x-1.5 font-noto text-sm font-normal text-muted-foreground group-data-[selected]:text-foreground',
+                  field.className,
+                  {
+                    'group-hover:text-recipient-green': selectedRecipientColor === 'green',
+                    'group-hover:text-recipient-blue': selectedRecipientColor === 'blue',
+                    'group-hover:text-recipient-purple': selectedRecipientColor === 'purple',
+                    'group-hover:text-recipient-orange': selectedRecipientColor === 'orange',
+                    'group-hover:text-recipient-yellow': selectedRecipientColor === 'yellow',
+                    'group-hover:text-recipient-pink': selectedRecipientColor === 'pink',
+                  },
+                )}
+              >
+                {field.type !== FieldType.SIGNATURE && <field.icon className="h-4 w-4" />}
+                {t(field.name)}
+              </p>
+            </button>
+          ))}
+        </div>
+      )}
 
       {selectedField && (
         <div
           className={cn(
-            'text-muted-foreground dark:text-muted-background font-noto pointer-events-none fixed z-50 flex cursor-pointer flex-col items-center justify-center rounded-[2px] bg-white ring-2 transition duration-200 [container-type:size]',
+            'dark:text-muted-background pointer-events-none fixed z-50 flex cursor-pointer flex-col items-center justify-center rounded-[2px] bg-white font-noto text-muted-foreground ring-2 transition duration-200 [container-type:size]',
             RECIPIENT_COLOR_STYLES[selectedRecipientColor].base,
             selectedField === FieldType.SIGNATURE && 'font-signature',
             {

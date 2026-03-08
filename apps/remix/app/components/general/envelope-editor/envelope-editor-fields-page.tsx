@@ -1,4 +1,4 @@
-import { lazy, useEffect, useMemo, useState } from 'react';
+import { lazy, useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { MessageDescriptor } from '@lingui/core';
 import { msg } from '@lingui/core/macro';
@@ -90,7 +90,27 @@ export const EnvelopeEditorFieldsPage = () => {
   const [isAiFieldDialogOpen, setIsAiFieldDialogOpen] = useState(false);
   const [isAiEnableDialogOpen, setIsAiEnableDialogOpen] = useState(false);
   const [isFieldsSheetOpen, setIsFieldsSheetOpen] = useState(false);
+  const [selectedFieldType, setSelectedFieldType] = useState<FieldType | null>(() =>
+    typeof globalThis.window !== 'undefined' && globalThis.window.innerWidth < 1024
+      ? FieldType.SIGNATURE
+      : null,
+  );
+  const [isMobile, setIsMobile] = useState(
+    () => typeof globalThis.window !== 'undefined' && globalThis.window.innerWidth < 1024,
+  );
   const { revalidate } = useRevalidator();
+
+  useEffect(() => {
+    const mq = globalThis.matchMedia('(max-width: 1023px)');
+    const handler = () => setIsMobile(mq.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  const handleFieldTypeSelect = useCallback((type: FieldType | null) => {
+    setSelectedFieldType(type);
+    setIsFieldsSheetOpen(false);
+  }, []);
 
   const selectedField = useMemo(
     () => structuredClone(editorFields.selectedField),
@@ -200,6 +220,7 @@ export const EnvelopeEditorFieldsPage = () => {
         <EnvelopeEditorFieldDragDrop
           selectedRecipientId={editorFields.selectedRecipient?.id ?? null}
           selectedEnvelopeItemId={currentEnvelopeItem?.id ?? null}
+          onFieldTypeSelect={isMobile ? handleFieldTypeSelect : undefined}
         />
 
         {isUserAdmin && (
@@ -348,6 +369,17 @@ export const EnvelopeEditorFieldsPage = () => {
 
   return (
     <div className="relative flex h-full min-w-0">
+      {/* Mobile: Always-mounted placement handler (persists when Sheet closes) */}
+      {isMobile && currentEnvelopeItem && envelope.recipients.length > 0 && (
+        <EnvelopeEditorFieldDragDrop
+          selectedRecipientId={editorFields.selectedRecipient?.id ?? null}
+          selectedEnvelopeItemId={currentEnvelopeItem?.id ?? null}
+          selectedFieldFromParent={selectedFieldType}
+          onFieldTypeSelect={handleFieldTypeSelect}
+          hideButtons
+        />
+      )}
+
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         {/* Horizontal envelope item selector */}
         <EnvelopeRendererFileSelector fields={editorFields.localFields} />
