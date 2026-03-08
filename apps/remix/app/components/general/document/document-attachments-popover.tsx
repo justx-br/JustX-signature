@@ -125,10 +125,14 @@ export const DocumentAttachmentsPopover = ({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" className={cn('gap-2', buttonClassName)} size={buttonSize}>
-          <Paperclip className="h-4 w-4" />
-
-          <span>
+        <Button
+          variant="outline"
+          className={cn('gap-2 px-2 sm:px-3', buttonClassName)}
+          size={buttonSize}
+          title={_(msg`Attachments`)}
+        >
+          <Paperclip className="h-4 w-4 shrink-0" />
+          <span className="hidden sm:inline">
             <Trans>Attachments</Trans>
             {attachments && attachments.data.length > 0 && (
               <span className="ml-1">({attachments.data.length})</span>
@@ -143,7 +147,7 @@ export const DocumentAttachmentsPopover = ({
             <h4 className="font-medium">
               <Trans>Attachments</Trans>
             </h4>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <p className="mt-1 text-sm text-muted-foreground">
               <Trans>Add links to relevant documents or resources.</Trans>
             </p>
           </div>
@@ -153,7 +157,7 @@ export const DocumentAttachmentsPopover = ({
               {attachments?.data.map((attachment) => (
                 <div
                   key={attachment.id}
-                  className="border-border flex items-center justify-between rounded-md border p-2"
+                  className="flex items-center justify-between rounded-md border border-border p-2"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{attachment.label}</p>
@@ -161,7 +165,7 @@ export const DocumentAttachmentsPopover = ({
                       href={attachment.data}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-foreground truncate text-xs underline"
+                      className="truncate text-xs text-muted-foreground underline hover:text-foreground"
                     >
                       {attachment.data}
                     </a>
