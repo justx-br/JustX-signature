@@ -17,8 +17,8 @@ export const TemplateConfirmationEmail = ({
       <TemplateDocumentImage className="mt-6" assetBaseUrl={assetBaseUrl} />
 
       <Section className="flex-row items-center justify-center">
-        <Text className="text-primary mx-auto mb-0 max-w-[80%] text-center text-lg font-semibold">
-          <Trans>Welcome to Documenso!</Trans>
+        <Text className="mx-auto mb-0 max-w-[80%] text-center text-lg font-semibold text-primary">
+          <Trans>Welcome to JustX!</Trans>
         </Text>
 
         <Text className="my-1 text-center text-base text-slate-400">

@@ -360,7 +360,7 @@ const SigningPageV1 = ({ data }: { data: Awaited<ReturnType<typeof handleV1Loade
           </p>
 
           {user ? (
-            <Link to="/" className="mt-36 text-documenso-700 hover:text-documenso-600">
+            <Link to="/" className="text-documenso-700 hover:text-documenso-600 mt-36">
               <Trans>Go Back Home</Trans>
             </Link>
           ) : (
@@ -371,7 +371,7 @@ const SigningPageV1 = ({ data }: { data: Awaited<ReturnType<typeof handleV1Loade
                   to="https://documenso.com"
                   className="text-documenso-700 hover:text-documenso-600"
                 >
-                  Check out Documenso
+                  Check out JustX
                 </Link>
                 .
               </Trans>
@@ -460,7 +460,7 @@ const SigningPageV2 = ({ data }: { data: Awaited<ReturnType<typeof handleV2Loade
           </p>
 
           {user ? (
-            <Link to="/" className="mt-36 text-documenso-700 hover:text-documenso-600">
+            <Link to="/" className="text-documenso-700 hover:text-documenso-600 mt-36">
               <Trans>Go Back Home</Trans>
             </Link>
           ) : (
@@ -471,7 +471,7 @@ const SigningPageV2 = ({ data }: { data: Awaited<ReturnType<typeof handleV2Loade
                   to="https://documenso.com"
                   className="text-documenso-700 hover:text-documenso-600"
                 >
-                  Check out Documenso
+                  Check out JustX
                 </Link>
                 .
               </Trans>
