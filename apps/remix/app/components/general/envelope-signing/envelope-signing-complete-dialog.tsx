@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import { useLingui } from '@lingui/react/macro';
 import { FieldType } from '@prisma/client';
@@ -13,8 +13,10 @@ import { mapSecondaryIdToDocumentId } from '@documenso/lib/utils/envelope';
 import { trpc } from '@documenso/trpc/react';
 import { useToast } from '@documenso/ui/primitives/use-toast';
 
+import { SignFieldSignatureDialog } from '~/components/dialogs/sign-field-signature-dialog';
 import { useEmbedSigningContext } from '~/components/embed/embed-signing-context';
 
+import { useRequiredDocumentSigningAuthContext } from '../document-signing/document-signing-auth-provider';
 import { DocumentSigningCompleteDialog } from '../document-signing/document-signing-complete-dialog';
 import { useRequiredEnvelopeSigningContext } from '../document-signing/envelope-signing-provider';
 
@@ -37,7 +39,11 @@ export const EnvelopeSignerCompleteDialog = () => {
     nextRecipient,
     email,
     fullName,
+    signature,
+    signField,
   } = useRequiredEnvelopeSigningContext();
+
+  const { executeActionAuthProcedure } = useRequiredDocumentSigningAuthContext();
 
   const { currentEnvelopeItem, setCurrentEnvelopeItem } = useCurrentEnvelopeRender();
 
@@ -48,34 +54,6 @@ export const EnvelopeSignerCompleteDialog = () => {
 
   const { mutateAsync: createDocumentFromDirectTemplate } =
     trpc.template.createDocumentFromDirectTemplate.useMutation();
-
-  const handleOnNextFieldClick = () => {
-    const nextField = recipientFieldsRemaining[0];
-
-    if (!nextField) {
-      setShowPendingFieldTooltip(false);
-      return;
-    }
-
-    const isEnvelopeItemSwitch = nextField.envelopeItemId !== currentEnvelopeItem?.id;
-
-    if (isEnvelopeItemSwitch) {
-      setCurrentEnvelopeItem(nextField.envelopeItemId);
-    }
-
-    setShowPendingFieldTooltip(true);
-
-    setTimeout(
-      () => {
-        const fieldTooltip = document.querySelector(`#field-tooltip`);
-
-        if (fieldTooltip) {
-          fieldTooltip.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      },
-      isEnvelopeItemSwitch ? 150 : 50,
-    );
-  };
 
   const handleOnCompleteClick = async (
     nextSigner?: { name: string; email: string },
@@ -206,6 +184,76 @@ export const EnvelopeSignerCompleteDialog = () => {
       throw err;
     }
   };
+
+  const handleOnNextFieldClick = async () => {
+    const nextField = recipientFieldsRemaining[0];
+
+    if (!nextField) {
+      setShowPendingFieldTooltip(false);
+      return;
+    }
+
+    if (nextField.type === FieldType.SIGNATURE) {
+      const signatureToInsert = await SignFieldSignatureDialog.call({
+        fullName,
+        initialSignature: signature ?? undefined,
+        typedSignatureEnabled: envelope.documentMeta.typedSignatureEnabled,
+        uploadSignatureEnabled: envelope.documentMeta.uploadSignatureEnabled,
+        drawSignatureEnabled: envelope.documentMeta.drawSignatureEnabled,
+      });
+
+      if (signatureToInsert) {
+        await executeActionAuthProcedure({
+          actionTarget: FieldType.SIGNATURE,
+          onReauthFormSubmit: async (authOptions) => {
+            await signField(
+              nextField.id,
+              { type: FieldType.SIGNATURE, value: signatureToInsert },
+              authOptions,
+            );
+          },
+        });
+
+        // Auto-complete if this was the last required field (autoSign flow from editor)
+        if (searchParams.get('autoSign') === 'true' && recipientFieldsRemaining.length === 1) {
+          await (isDirectTemplate ? handleDirectTemplateCompleteClick() : handleOnCompleteClick());
+        }
+      }
+
+      return;
+    }
+
+    const isEnvelopeItemSwitch = nextField.envelopeItemId !== currentEnvelopeItem?.id;
+
+    if (isEnvelopeItemSwitch) {
+      setCurrentEnvelopeItem(nextField.envelopeItemId);
+    }
+
+    setShowPendingFieldTooltip(true);
+
+    setTimeout(
+      () => {
+        const fieldTooltip = document.querySelector(`#field-tooltip`);
+
+        if (fieldTooltip) {
+          fieldTooltip.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      },
+      isEnvelopeItemSwitch ? 150 : 50,
+    );
+  };
+
+  const hasAutoSigned = useRef(false);
+
+  useEffect(() => {
+    if (hasAutoSigned.current) return;
+    if (searchParams.get('autoSign') !== 'true') return;
+    if (recipientFieldsRemaining.length === 0) return;
+    if (recipientFieldsRemaining[0]?.type !== FieldType.SIGNATURE) return;
+
+    hasAutoSigned.current = true;
+    void handleOnNextFieldClick();
+  }, [recipientFieldsRemaining]);
 
   const recipientPayload = useMemo(() => {
     if (!isDirectTemplate) {

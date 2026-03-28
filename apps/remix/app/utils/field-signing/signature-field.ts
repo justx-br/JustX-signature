@@ -40,16 +40,13 @@ export const handleSignatureFieldClick = async (
     };
   }
 
-  let signatureToInsert = signature;
-
-  if (!signatureToInsert) {
-    signatureToInsert = await SignFieldSignatureDialog.call({
-      fullName,
-      typedSignatureEnabled,
-      uploadSignatureEnabled,
-      drawSignatureEnabled,
-    });
-  }
+  const signatureToInsert = await SignFieldSignatureDialog.call({
+    fullName,
+    initialSignature: signature ?? undefined,
+    typedSignatureEnabled,
+    uploadSignatureEnabled,
+    drawSignatureEnabled,
+  });
 
   if (!signatureToInsert) {
     return null;

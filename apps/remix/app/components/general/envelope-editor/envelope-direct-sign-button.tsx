@@ -112,8 +112,8 @@ export const EnvelopeDirectSignButton = () => {
         throw new Error('No signing token returned');
       }
 
-      // Redirect to signing page
-      const signingPath = `/sign/${firstRecipient.token}`;
+      // Redirect to signing page (autoSign=true triggers the signature dialog immediately)
+      const signingPath = `/sign/${firstRecipient.token}?autoSign=true`;
 
       toast({
         title: t`Document ready`,
