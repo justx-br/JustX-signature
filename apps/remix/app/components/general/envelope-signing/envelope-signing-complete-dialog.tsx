@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { useLingui } from '@lingui/react/macro';
+import { Trans, useLingui } from '@lingui/react/macro';
 import { FieldType } from '@prisma/client';
+import { motion } from 'framer-motion';
+import { Loader } from 'lucide-react';
 import { useNavigate, useRevalidator, useSearchParams } from 'react-router';
 
 import { useAnalytics } from '@documenso/lib/client-only/hooks/use-analytics';
@@ -48,6 +50,8 @@ export const EnvelopeSignerCompleteDialog = () => {
   const { currentEnvelopeItem, setCurrentEnvelopeItem } = useCurrentEnvelopeRender();
 
   const { onDocumentCompleted, onDocumentError } = useEmbedSigningContext() || {};
+
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const { mutateAsync: completeDocument, isPending } =
     trpc.recipient.completeDocumentWithToken.useMutation();
@@ -203,20 +207,27 @@ export const EnvelopeSignerCompleteDialog = () => {
       });
 
       if (signatureToInsert) {
-        await executeActionAuthProcedure({
-          actionTarget: FieldType.SIGNATURE,
-          onReauthFormSubmit: async (authOptions) => {
-            await signField(
-              nextField.id,
-              { type: FieldType.SIGNATURE, value: signatureToInsert },
-              authOptions,
-            );
-          },
-        });
+        setIsProcessing(true);
+        try {
+          await executeActionAuthProcedure({
+            actionTarget: FieldType.SIGNATURE,
+            onReauthFormSubmit: async (authOptions) => {
+              await signField(
+                nextField.id,
+                { type: FieldType.SIGNATURE, value: signatureToInsert },
+                authOptions,
+              );
+            },
+          });
 
-        // Auto-complete if this was the last required field (autoSign flow from editor)
-        if (searchParams.get('autoSign') === 'true' && recipientFieldsRemaining.length === 1) {
-          await (isDirectTemplate ? handleDirectTemplateCompleteClick() : handleOnCompleteClick());
+          // Auto-complete if this was the last required field (autoSign flow from editor)
+          if (searchParams.get('autoSign') === 'true' && recipientFieldsRemaining.length === 1) {
+            await (isDirectTemplate
+              ? handleDirectTemplateCompleteClick()
+              : handleOnCompleteClick());
+          }
+        } finally {
+          setIsProcessing(false);
         }
       }
 
@@ -276,25 +287,50 @@ export const EnvelopeSignerCompleteDialog = () => {
   }, [email, fullName, isDirectTemplate, recipient.email, recipient.name, recipient.fields]);
 
   return (
-    <DocumentSigningCompleteDialog
-      isSubmitting={isPending}
-      recipientPayload={recipientPayload}
-      onSignatureComplete={
-        isDirectTemplate ? handleDirectTemplateCompleteClick : handleOnCompleteClick
-      }
-      documentTitle={envelope.title}
-      fields={recipientFieldsRemaining}
-      fieldsValidated={handleOnNextFieldClick}
-      recipient={recipient}
-      allowDictateNextSigner={Boolean(
-        nextRecipient && envelope.documentMeta.allowDictateNextSigner,
+    <>
+      <DocumentSigningCompleteDialog
+        isSubmitting={isPending}
+        recipientPayload={recipientPayload}
+        onSignatureComplete={
+          isDirectTemplate ? handleDirectTemplateCompleteClick : handleOnCompleteClick
+        }
+        documentTitle={envelope.title}
+        fields={recipientFieldsRemaining}
+        fieldsValidated={handleOnNextFieldClick}
+        recipient={recipient}
+        allowDictateNextSigner={Boolean(
+          nextRecipient && envelope.documentMeta.allowDictateNextSigner,
+        )}
+        disableNameInput={!isDirectTemplate && recipient.name !== ''}
+        defaultNextSigner={
+          nextRecipient ? { name: nextRecipient.name, email: nextRecipient.email } : undefined
+        }
+        buttonSize="sm"
+        position="center"
+      />
+
+      {isProcessing && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.15 }}
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-6 bg-background/95 backdrop-blur-sm"
+        >
+          <div className="flex flex-col items-center gap-4 text-center">
+            <div className="rounded-full bg-primary/10 p-5">
+              <Loader className="h-8 w-8 animate-spin text-primary" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-lg font-semibold text-foreground">
+                <Trans>Processing signature</Trans>
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <Trans>Please wait a moment...</Trans>
+              </p>
+            </div>
+          </div>
+        </motion.div>
       )}
-      disableNameInput={!isDirectTemplate && recipient.name !== ''}
-      defaultNextSigner={
-        nextRecipient ? { name: nextRecipient.name, email: nextRecipient.email } : undefined
-      }
-      buttonSize="sm"
-      position="center"
-    />
+    </>
   );
 };
