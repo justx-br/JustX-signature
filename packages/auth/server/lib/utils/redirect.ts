@@ -18,9 +18,9 @@ export const handleRequestRedirect = (redirectUrl?: string) => {
 };
 
 export const handleSignInRedirect = (redirectUrl: string = '/') => {
-  const url = new URL(redirectUrl, NEXT_PUBLIC_WEBAPP_URL());
+  const url = new URL(redirectUrl, window.location.origin);
 
-  if (url.origin !== NEXT_PUBLIC_WEBAPP_URL()) {
+  if (url.origin !== window.location.origin) {
     window.location.href = '/';
   } else {
     window.location.href = redirectUrl;
