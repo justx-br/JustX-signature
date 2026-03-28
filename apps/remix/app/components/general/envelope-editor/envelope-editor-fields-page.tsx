@@ -90,7 +90,7 @@ export const EnvelopeEditorFieldsPage = () => {
   const [isAiFieldDialogOpen, setIsAiFieldDialogOpen] = useState(false);
   const [isAiEnableDialogOpen, setIsAiEnableDialogOpen] = useState(false);
   const [isFieldsSheetOpen, setIsFieldsSheetOpen] = useState(false);
-  const [selectedFieldType, setSelectedFieldType] = useState<FieldType | null>(FieldType.SIGNATURE);
+  const [selectedFieldType, setSelectedFieldType] = useState<FieldType | null>(null);
   const [isMobile, setIsMobile] = useState(
     () => typeof globalThis.window !== 'undefined' && globalThis.window.innerWidth < 1024,
   );
