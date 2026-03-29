@@ -38,11 +38,7 @@ export const DocumentCompletedEmailTemplate = ({
               {branding.brandingEnabled && branding.brandingLogo ? (
                 <Img src={branding.brandingLogo} alt="Branding Logo" className="mb-4 h-6" />
               ) : (
-                <Img
-                  src={getAssetUrl('/static/logo.svg')}
-                  alt="Justx Logo"
-                  className="mb-4 h-6"
-                />
+                <Img src={getAssetUrl('/static/logo.svg')} alt="JustX Logo" className="mb-4 h-6" />
               )}
 
               <TemplateDocumentCompleted

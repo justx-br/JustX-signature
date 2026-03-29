@@ -66,6 +66,16 @@ type RecipientGetEmailContextOptions = BaseGetEmailContextOptions & {
 
 type GetEmailContextOptions = InternalGetEmailContextOptions | RecipientGetEmailContextOptions;
 
+const LEGACY_INTERNAL_SENDER_DISPLAY_NAMES = new Set(['documenso']);
+
+const resolveRecipientSenderDisplayName = (emailName: string) => {
+  if (LEGACY_INTERNAL_SENDER_DISPLAY_NAMES.has(emailName.trim().toLowerCase())) {
+    return DOCUMENSO_INTERNAL_EMAIL.name;
+  }
+
+  return emailName;
+};
+
 type EmailContextResponse = {
   allowedEmails: OrganisationEmail[];
   branding: BrandingSettings;
@@ -122,7 +132,7 @@ export const getEmailContext = async (
 
   const senderEmail = foundSenderEmail
     ? {
-        name: foundSenderEmail.emailName,
+        name: resolveRecipientSenderDisplayName(foundSenderEmail.emailName),
         address: foundSenderEmail.email,
       }
     : DOCUMENSO_INTERNAL_EMAIL;
