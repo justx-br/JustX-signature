@@ -56,12 +56,12 @@ export const SignaturePad = ({
   const [tab, setTab] = useState(
     ((): 'draw' | 'text' | 'image' => {
       // First passthrough to check to see if there's a signature for a given tab.
-      if (drawSignatureEnabled && drawSignature) {
-        return 'draw';
-      }
-
       if (typedSignatureEnabled && typedSignature) {
         return 'text';
+      }
+
+      if (drawSignatureEnabled && drawSignature) {
+        return 'draw';
       }
 
       if (uploadSignatureEnabled && imageSignature) {
@@ -69,12 +69,12 @@ export const SignaturePad = ({
       }
 
       // Second passthrough to just select the first avaliable tab.
-      if (drawSignatureEnabled) {
-        return 'draw';
-      }
-
       if (typedSignatureEnabled) {
         return 'text';
+      }
+
+      if (drawSignatureEnabled) {
+        return 'draw';
       }
 
       if (uploadSignatureEnabled) {
@@ -146,17 +146,17 @@ export const SignaturePad = ({
       onValueChange={(value) => onTabChange(value as 'draw' | 'text' | 'image')}
     >
       <TabsList>
-        {drawSignatureEnabled && (
-          <TabsTrigger value="draw">
-            <SignatureIcon className="mr-2 size-4" />
-            <Trans context="Draw signature">Draw</Trans>
-          </TabsTrigger>
-        )}
-
         {typedSignatureEnabled && (
           <TabsTrigger value="text">
             <KeyboardIcon className="mr-2 size-4" />
             <Trans context="Type signature">Type</Trans>
+          </TabsTrigger>
+        )}
+
+        {drawSignatureEnabled && (
+          <TabsTrigger value="draw">
+            <SignatureIcon className="mr-2 size-4" />
+            <Trans context="Draw signature">Draw</Trans>
           </TabsTrigger>
         )}
 
