@@ -34,6 +34,19 @@ type TPasskeySignin = InferRequestType<AuthClientType['passkey']['authorize']['$
   redirectPath?: string;
 };
 
+/**
+ * In the browser, auth must target the same origin as the loaded page. Client bundles can embed a
+ * build-time `NEXT_PUBLIC_WEBAPP_URL` (e.g. production) while you serve the app from localhost,
+ * which causes cross-origin fetches and CORS failures.
+ */
+function getAuthApiBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}/api/auth`;
+  }
+
+  return `${NEXT_PUBLIC_WEBAPP_URL()}/api/auth`;
+}
+
 export class AuthClient {
   public client: AuthClientType;
 
@@ -364,5 +377,5 @@ export class AuthClient {
 }
 
 export const authClient = new AuthClient({
-  baseUrl: `${NEXT_PUBLIC_WEBAPP_URL()}/api/auth`,
+  baseUrl: getAuthApiBaseUrl(),
 });

@@ -31,7 +31,7 @@
     "prisma:migrate-reset": "npm run with:env -- npm run prisma:migrate-reset -w @documenso/prisma",
     "prisma:seed": "npm run with:env -- npm run prisma:seed -w @documenso/prisma",
     "prisma:studio": "npm run with:env -- npm run prisma:studio -w @documenso/prisma",
-    "with:env": "dotenv -e .env -e .env.local --",
+    "with:env": "dotenv -o -e .env -e .env.local --",
     "reset:hard": "npm run clean && npm i && npm run prisma:generate",
     "precommit": "npm install && git add package.json package-lock.json",
     "trigger:dev": "npm run with:env -- npx trigger-cli dev --handler-path=\"/api/jobs\"",

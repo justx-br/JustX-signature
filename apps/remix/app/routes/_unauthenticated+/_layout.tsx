@@ -1,7 +1,8 @@
 import { Link, Outlet } from 'react-router';
 
 import backgroundPattern from '@documenso/assets/images/background-pattern.png';
-import Logo from '@documenso/assets/logo.svg';
+
+import { BrandingLogo } from '~/components/general/branding-logo';
 
 export default function Layout() {
   return (
@@ -24,13 +25,7 @@ export default function Layout() {
             to="/"
             className="relative z-20 flex items-center rounded-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            <img
-              src={Logo}
-              alt="Justx"
-              className="h-10 w-auto object-contain object-left drop-shadow-sm md:h-11"
-              width={200}
-              height={44}
-            />
+            <BrandingLogo className="h-10 w-auto drop-shadow-sm md:h-11" width={200} height={44} />
           </Link>
           <div className="w-full">
             <Outlet />

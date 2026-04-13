@@ -6,7 +6,6 @@ import { PlusIcon } from 'lucide-react';
 import { ChevronLeft } from 'lucide-react';
 import { Link, Outlet, isRouteErrorResponse } from 'react-router';
 
-import Logo from '@documenso/assets/logo.svg';
 import { useOptionalSession } from '@documenso/lib/client-only/providers/session';
 import { cn } from '@documenso/ui/lib/utils';
 import { Button } from '@documenso/ui/primitives/button';
@@ -44,28 +43,22 @@ export default function PublicProfileLayout() {
       ) : (
         <header
           className={cn(
-            'supports-backdrop-blur:bg-background/60 bg-background/95 sticky top-0 z-[60] flex h-16 w-full items-center border-b border-b-transparent backdrop-blur duration-200',
+            'supports-backdrop-blur:bg-background/60 sticky top-0 z-[60] flex h-16 w-full items-center border-b border-b-transparent bg-background/95 backdrop-blur duration-200',
             scrollY > 5 && 'border-b-border',
           )}
         >
           <div className="mx-auto flex w-full max-w-screen-xl items-center justify-between gap-x-4 px-4 md:px-8">
             <Link
               to="/"
-              className="focus-visible:ring-ring ring-offset-background rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 md:inline"
+              className="rounded-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:inline"
             >
               <BrandingLogo className="hidden h-8 w-auto sm:block sm:h-9" />
 
-              <img
-                src={Logo}
-                alt="Justx Logo"
-                width={160}
-                height={36}
-                className="h-8 w-auto object-contain sm:hidden"
-              />
+              <BrandingLogo className="h-8 w-auto sm:hidden" width={160} height={36} />
             </Link>
 
             <div className="flex flex-row items-center justify-center">
-              <p className="text-muted-foreground mr-4">
+              <p className="mr-4 text-muted-foreground">
                 <span className="text-sm sm:hidden">
                   <Trans>Want your own public profile?</Trans>
                 </span>

@@ -27,6 +27,29 @@ import { langCookie } from './storage/lang-cookie.server';
 import { themeSessionResolver } from './storage/theme-session.server';
 import { appMetaTags } from './utils/meta';
 
+/** Favicon por tema do SO: claro → blackicon, escuro → whiteicon (`public/static/`). */
+const JUSTX_FAVICON_SYNC_SCRIPT = `
+(function syncFaviconForColorScheme() {
+  function apply() {
+    var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var name = dark ? 'whiteicon.png' : 'blackicon.png';
+    var link = document.querySelector('link[data-justx-favicon]');
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      link.type = 'image/png';
+      link.setAttribute('data-justx-favicon', '1');
+      document.head.appendChild(link);
+    }
+    link.href = '/static/' + name;
+  }
+  apply();
+  var mq = window.matchMedia('(prefers-color-scheme: dark)');
+  if (typeof mq.addEventListener === 'function') mq.addEventListener('change', apply);
+  else if (typeof mq.addListener === 'function') mq.addListener(apply);
+})();
+`.trim();
+
 export const links: Route.LinksFunction = () => [{ rel: 'stylesheet', href: stylesheet }];
 
 export function meta() {
@@ -61,6 +84,17 @@ export async function loader({ request }: Route.LoaderArgs) {
     organisations = await getOrganisationSession({ userId: session.user.id });
   }
 
+  const publicEnv: Record<string, string | undefined> = { ...createPublicEnv() };
+  try {
+    const requestUrl = new URL(request.url);
+    const host = requestUrl.hostname;
+    if (host === 'localhost' || host === '127.0.0.1' || host === '[::1]') {
+      publicEnv.NEXT_PUBLIC_WEBAPP_URL = requestUrl.origin;
+    }
+  } catch {
+    // ignore malformed request URL
+  }
+
   return data(
     {
       lang,
@@ -73,7 +107,7 @@ export async function loader({ request }: Route.LoaderArgs) {
             organisations: organisations || [],
           }
         : null,
-      publicEnv: createPublicEnv(),
+      publicEnv,
     },
     {
       headers: {
@@ -105,6 +139,10 @@ export function LayoutContent({ children }: { children: React.ReactNode }) {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="manifest" href="/site.webmanifest" />
+        <script
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JUSTX_FAVICON_SYNC_SCRIPT }}
+        />
         <Links />
         <meta name="google" content="notranslate" />
         <Meta />

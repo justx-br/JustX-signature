@@ -11,7 +11,7 @@
     "start": "npm run with:env -- cross-env NODE_ENV=production node build/server/main.js",
     "clean": "rimraf .react-router && rimraf node_modules",
     "typecheck": "react-router typegen && tsc",
-    "with:env": "dotenv -e ../../.env -e ../../.env.local --"
+    "with:env": "dotenv -o -e ../../.env -e ../../.env.local --"
   },
   "dependencies": {
     "@cantoo/pdf-lib": "^2.5.3",

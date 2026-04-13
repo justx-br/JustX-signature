@@ -26,13 +26,18 @@ export const auth = new Hono<HonoAuthContext>()
     const headerOrigin = c.req.header('Origin');
 
     if (headerOrigin && headerOrigin !== validOrigin) {
-      return c.json(
-        {
-          message: 'Forbidden',
-          statusCode: 403,
-        },
-        403,
-      );
+      const localDevOrigin =
+        process.env.NODE_ENV === 'development' &&
+        /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/i.test(headerOrigin);
+      if (!localDevOrigin) {
+        return c.json(
+          {
+            message: 'Forbidden',
+            statusCode: 403,
+          },
+          403,
+        );
+      }
     }
 
     await next();
