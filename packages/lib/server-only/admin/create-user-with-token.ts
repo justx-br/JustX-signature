@@ -67,26 +67,37 @@ export async function createUserWithToken(
 
     const team = personalOrg.teams[0];
 
-    // Check if token already exists for this team
-    const existingToken = existingUser.apiTokens.find((token) => token.teamId === team.id);
-
-    if (existingToken) {
-      throw new Error('User provisioning failed. Please contact support.');
+    // Re-enable the user if they were previously disabled (e.g. after soft-delete in JustX)
+    if (existingUser.disabled) {
+      await prisma.user.update({
+        where: { id: existingUser.id },
+        data: { disabled: false },
+      });
     }
 
-    // Create token for existing user
+    // If a token already exists (even expired from a previous disable), regenerate it.
+    // This handles re-provisioning after a user deletes and re-registers their account.
+    const existingToken = existingUser.apiTokens.find((token) => token.teamId === team.id);
+
     const apiToken = `api_${alphaid(16)}`;
     const hashedToken = hashString(apiToken);
 
-    await prisma.apiToken.create({
-      data: {
-        name: tokenName,
-        token: hashedToken,
-        userId: existingUser.id,
-        teamId: team.id,
-        expires: null,
-      },
-    });
+    if (existingToken) {
+      await prisma.apiToken.update({
+        where: { id: existingToken.id },
+        data: { token: hashedToken, expires: null },
+      });
+    } else {
+      await prisma.apiToken.create({
+        data: {
+          name: tokenName,
+          token: hashedToken,
+          userId: existingUser.id,
+          teamId: team.id,
+          expires: null,
+        },
+      });
+    }
 
     return {
       userId: existingUser.id,
