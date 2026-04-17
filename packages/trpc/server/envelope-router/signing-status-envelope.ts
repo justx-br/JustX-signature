@@ -1,6 +1,14 @@
-import { DocumentStatus, EnvelopeType, RecipientRole, SigningStatus } from '@prisma/client';
+import {
+  BackgroundJobStatus,
+  DocumentStatus,
+  EnvelopeType,
+  RecipientRole,
+  SigningStatus,
+} from '@prisma/client';
 
 import { AppError, AppErrorCode } from '@documenso/lib/errors/app-error';
+import { jobs } from '@documenso/lib/jobs/client';
+import { mapSecondaryIdToDocumentId } from '@documenso/lib/utils/envelope';
 import { prisma } from '@documenso/prisma';
 
 import { maybeAuthenticatedProcedure } from '../trpc';
@@ -71,6 +79,25 @@ export const signingStatusEnvelopeRoute = maybeAuthenticatedProcedure
       );
 
     if (isComplete) {
+      const documentId = mapSecondaryIdToDocumentId(envelope.secondaryId);
+
+      const activeJob = await prisma.backgroundJob.findFirst({
+        where: {
+          jobId: 'internal.seal-document',
+          status: { in: [BackgroundJobStatus.PENDING, BackgroundJobStatus.PROCESSING] },
+          payload: { path: ['documentId'], equals: documentId },
+        },
+      });
+
+      if (!activeJob) {
+        await jobs
+          .triggerJob({
+            name: 'internal.seal-document',
+            payload: { documentId, sendEmail: true },
+          })
+          .catch(() => null);
+      }
+
       return {
         status: 'PROCESSING',
       };

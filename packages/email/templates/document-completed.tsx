@@ -1,14 +1,36 @@
 import { msg } from '@lingui/core/macro';
 import { useLingui } from '@lingui/react';
+import fs from 'node:fs';
+import path from 'node:path';
 
-import { Body, Container, Head, Html, Img, Preview, Section } from '../components';
-import { useBranding } from '../providers/branding';
+import { Body, Container, Head, Html, Img, Preview, Section, Text } from '../components';
 import type { TemplateDocumentCompletedProps } from '../template-components/template-document-completed';
 import { TemplateDocumentCompleted } from '../template-components/template-document-completed';
 import { TemplateFooter } from '../template-components/template-footer';
 
 export type DocumentCompletedEmailTemplateProps = Partial<TemplateDocumentCompletedProps> & {
   customBody?: string;
+};
+
+const getJustxWhiteLogoDataUri = (): string | null => {
+  const candidates = [
+    path.join(process.cwd(), 'public/static/justxwhite.png'),
+    path.join(process.cwd(), 'apps/remix/public/static/justxwhite.png'),
+  ];
+
+  for (const logoPath of candidates) {
+    try {
+      if (!fs.existsSync(logoPath)) {
+        continue;
+      }
+      const data = fs.readFileSync(logoPath).toString('base64');
+      return `data:image/png;base64,${data}`;
+    } catch {
+      // try next candidate
+    }
+  }
+
+  return null;
 };
 
 export const DocumentCompletedEmailTemplate = ({
@@ -18,13 +40,10 @@ export const DocumentCompletedEmailTemplate = ({
   customBody,
 }: DocumentCompletedEmailTemplateProps) => {
   const { _ } = useLingui();
-  const branding = useBranding();
 
   const previewText = msg`Completed Document`;
 
-  const getAssetUrl = (path: string) => {
-    return new URL(path, assetBaseUrl).toString();
-  };
+  const justxLogoDataUri = getJustxWhiteLogoDataUri();
 
   return (
     <Html>
@@ -33,14 +52,20 @@ export const DocumentCompletedEmailTemplate = ({
 
       <Body className="mx-auto my-auto font-sans">
         <Section className="bg-white">
-          <Container className="mx-auto mb-2 mt-8 max-w-xl rounded-lg border border-solid border-slate-200 p-2 backdrop-blur-sm">
-            <Section className="p-2">
-              {branding.brandingEnabled && branding.brandingLogo ? (
-                <Img src={branding.brandingLogo} alt="Branding Logo" className="mb-4 h-6" />
+          <Container className="mx-auto mb-2 mt-8 max-w-xl overflow-hidden rounded-lg border border-solid border-slate-200">
+            <Section className="bg-black px-6 py-5 text-center">
+              {justxLogoDataUri ? (
+                <Img
+                  src={justxLogoDataUri}
+                  alt="JustX"
+                  className="mx-auto h-8 w-auto max-w-[200px]"
+                />
               ) : (
-                <Img src={getAssetUrl('/static/logo.svg')} alt="JustX Logo" className="mb-4 h-6" />
+                <Text className="text-center text-2xl font-bold text-white">JustX</Text>
               )}
+            </Section>
 
+            <Section className="bg-white p-6 text-center">
               <TemplateDocumentCompleted
                 downloadLink={downloadLink}
                 documentName={documentName}

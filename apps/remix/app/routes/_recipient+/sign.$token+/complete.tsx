@@ -124,7 +124,10 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
       token: recipient?.token || '',
     },
     {
-      refetchInterval: 3000,
+      refetchInterval: (query) => {
+        const status = query.state.data?.status;
+        return status === 'COMPLETED' || status === 'REJECTED' ? false : 3000;
+      },
       initialData: match(document?.status)
         .with(DocumentStatus.COMPLETED, () => ({ status: 'COMPLETED' }) as const)
         .with(DocumentStatus.REJECTED, () => ({ status: 'REJECTED' }) as const)
@@ -179,7 +182,7 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
 
           {match({ status: signingStatus, deletedAt: document.deletedAt })
             .with({ status: 'COMPLETED' }, () => (
-              <div className="mt-4 flex items-center text-center text-documenso-700">
+              <div className="text-documenso-700 mt-4 flex items-center text-center">
                 <CheckCircle2 className="mr-2 h-5 w-5" />
                 <span className="text-sm">
                   <Trans>Everyone has signed</Trans>

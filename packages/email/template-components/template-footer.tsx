@@ -16,7 +16,7 @@ export const TemplateFooter = ({ isDocument = true }: TemplateFooterProps) => {
         <Text className="my-4 text-base text-slate-400">
           <Trans>
             This document was sent using{' '}
-            <Link className="text-[#7AC455]" href="https://documen.so/mail-footer">
+            <Link className="text-black" href="https://justx.com.br">
               JustX
             </Link>
             .
@@ -39,9 +39,13 @@ export const TemplateFooter = ({ isDocument = true }: TemplateFooterProps) => {
 
       {!branding.brandingEnabled && (
         <Text className="my-8 text-sm text-slate-400">
-          JustX, Inc.
+          JustX
           <br />
-          2261 Market Street, #5211, San Francisco, CA 94114, USA
+          justx@justx.com.br | (47) 9 9283-2406
+          <br />
+          R. Carlos Speicher S/n. | CEP 89.295-220
+          <br />
+          CNPJ 60.226.892/0001-75
         </Text>
       )}
     </Section>
