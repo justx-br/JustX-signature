@@ -23,6 +23,7 @@ export type SessionUser = Pick<
   | 'twoFactorEnabled'
   | 'roles'
   | 'signature'
+  | 'disabled'
 >;
 
 export type SessionValidationResult =
@@ -98,6 +99,7 @@ export const validateSessionToken = async (token: string): Promise<SessionValida
           twoFactorEnabled: true,
           roles: true,
           signature: true,
+          disabled: true,
         },
       },
     },
@@ -108,6 +110,11 @@ export const validateSessionToken = async (token: string): Promise<SessionValida
   }
 
   const { user, ...session } = result;
+
+  if (user.disabled) {
+    await prisma.session.delete({ where: { id: sessionId } });
+    return { session: null, user: null, isAuthenticated: false };
+  }
 
   if (Date.now() >= session.expiresAt.getTime()) {
     await prisma.session.delete({ where: { id: sessionId } });
