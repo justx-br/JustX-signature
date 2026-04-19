@@ -23,6 +23,7 @@ import { downloadRoute } from './api/download/download';
 import { filesRoute } from './api/files/files';
 import { justxCreateUserRoute } from './api/justx/create-user';
 import { justxDeleteUserRoute } from './api/justx/delete-user';
+import { justxUpdatePasswordRoute } from './api/justx/update-password';
 import { type AppContext, appContext } from './context';
 import { appMiddleware } from './middleware';
 import { openApiTrpcServerHandler } from './trpc/hono-trpc-open-api';
@@ -106,6 +107,7 @@ app.route('/api/auth', auth);
 // JustX internal provisioning API (creates user + org + team + ApiToken).
 app.route('/api/internal/justx', justxCreateUserRoute);
 app.route('/api/internal/justx', justxDeleteUserRoute);
+app.route('/api/internal/justx', justxUpdatePasswordRoute);
 
 // Files route.
 app.route('/api/files', filesRoute);
