@@ -405,8 +405,9 @@ const renderColumnThree = (options: RenderColumnOptions) => {
       label: i18n._(msg`Sent`),
       value: recipient.logs.emailed
         ? DateTime.fromJSDate(recipient.logs.emailed.createdAt)
+            .setZone('America/Sao_Paulo')
             .setLocale(APP_I18N_OPTIONS.defaultLocale)
-            .toFormat('yyyy-MM-dd hh:mm:ss a (ZZZZ)')
+            .toFormat('dd/MM/yyyy HH:mm:ss (ZZZZ)')
         : recipient.logs.sent
           ? DateTime.fromJSDate(recipient.logs.sent.createdAt)
               .setLocale(APP_I18N_OPTIONS.defaultLocale)
@@ -417,8 +418,9 @@ const renderColumnThree = (options: RenderColumnOptions) => {
       label: i18n._(msg`Viewed`),
       value: recipient.logs.opened
         ? DateTime.fromJSDate(recipient.logs.opened.createdAt)
+            .setZone('America/Sao_Paulo')
             .setLocale(APP_I18N_OPTIONS.defaultLocale)
-            .toFormat('yyyy-MM-dd hh:mm:ss a (ZZZZ)')
+            .toFormat('dd/MM/yyyy HH:mm:ss (ZZZZ)')
         : i18n._(msg`Unknown`),
     },
   ];
@@ -435,8 +437,9 @@ const renderColumnThree = (options: RenderColumnOptions) => {
       label: i18n._(msg`Signed`),
       value: recipient.logs.completed
         ? DateTime.fromJSDate(recipient.logs.completed.createdAt)
+            .setZone('America/Sao_Paulo')
             .setLocale(APP_I18N_OPTIONS.defaultLocale)
-            .toFormat('yyyy-MM-dd hh:mm:ss a (ZZZZ)')
+            .toFormat('dd/MM/yyyy HH:mm:ss (ZZZZ)')
         : i18n._(msg`Unknown`),
     });
   }
@@ -762,12 +765,22 @@ export async function renderCertificate({
       fontStyle: '700',
     });
 
+    const ownerInfoText = new Konva.Text({
+      x: margin,
+      y: pageTopMargin - 18,
+      text: `${i18n._(msg`Sender`)}: ${envelopeOwner.name} (${envelopeOwner.email})`,
+      fontFamily: 'Inter',
+      fontSize: textSm,
+      fill: textMutedForeground,
+    });
+
     table.setAttrs({
       x: margin,
       y: pageTopMargin,
     } satisfies Partial<Konva.GroupConfig>);
 
     group.add(titleText);
+    group.add(ownerInfoText);
     group.add(table);
 
     // Add QR code and branding on the last page if there is space.

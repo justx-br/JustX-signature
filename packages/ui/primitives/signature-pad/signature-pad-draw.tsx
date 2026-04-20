@@ -86,6 +86,12 @@ export const SignaturePadDraw = ({
       event.preventDefault();
     }
 
+    // Capture the pointer so that pointerup always fires on the canvas, preventing
+    // accidental tab switches when the user releases outside the canvas bounds.
+    if ('pointerId' in event && $el.current) {
+      $el.current.setPointerCapture((event as PointerEvent).pointerId);
+    }
+
     setIsPressed(true);
 
     const point = Point.fromEvent(event, SIGNATURE_CANVAS_DPI, $el.current);
@@ -284,8 +290,6 @@ export const SignaturePadDraw = ({
         onPointerMove={(event) => onMouseMove(event)}
         onPointerDown={(event) => onMouseDown(event)}
         onPointerUp={(event) => onMouseUp(event)}
-        onPointerLeave={(event) => onMouseLeave(event)}
-        onPointerEnter={(event) => onMouseEnter(event)}
         {...props}
       />
 

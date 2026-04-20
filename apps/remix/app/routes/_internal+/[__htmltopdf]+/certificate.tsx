@@ -227,6 +227,11 @@ export default function SigningCertificate({ loaderData }: Route.ComponentProps)
         <h1 className="my-8 text-2xl font-bold">{_(msg`Signing Certificate`)}</h1>
       </div>
 
+      <p className="mb-4 text-sm text-muted-foreground">
+        <span className="font-medium">{_(msg`Sender`)}:</span> {document.user.name} (
+        {document.user.email})
+      </p>
+
       <Card>
         <CardContent className="p-0">
           <Table overflowHidden>
@@ -318,12 +323,14 @@ export default function SigningCertificate({ loaderData }: Route.ComponentProps)
                           <span className="inline-block">
                             {logs.EMAIL_SENT[0]
                               ? DateTime.fromJSDate(logs.EMAIL_SENT[0].createdAt)
+                                  .setZone('America/Sao_Paulo')
                                   .setLocale(APP_I18N_OPTIONS.defaultLocale)
-                                  .toFormat('yyyy-MM-dd hh:mm:ss a (ZZZZ)')
+                                  .toFormat('dd/MM/yyyy HH:mm:ss (ZZZZ)')
                               : logs.DOCUMENT_SENT[0]
                                 ? DateTime.fromJSDate(logs.DOCUMENT_SENT[0].createdAt)
+                                    .setZone('America/Sao_Paulo')
                                     .setLocale(APP_I18N_OPTIONS.defaultLocale)
-                                    .toFormat('yyyy-MM-dd hh:mm:ss a (ZZZZ)')
+                                    .toFormat('dd/MM/yyyy HH:mm:ss (ZZZZ)')
                                 : _(msg`Unknown`)}
                           </span>
                         </p>
@@ -333,8 +340,9 @@ export default function SigningCertificate({ loaderData }: Route.ComponentProps)
                           <span className="inline-block">
                             {logs.DOCUMENT_OPENED[0]
                               ? DateTime.fromJSDate(logs.DOCUMENT_OPENED[0].createdAt)
+                                  .setZone('America/Sao_Paulo')
                                   .setLocale(APP_I18N_OPTIONS.defaultLocale)
-                                  .toFormat('yyyy-MM-dd hh:mm:ss a (ZZZZ)')
+                                  .toFormat('dd/MM/yyyy HH:mm:ss (ZZZZ)')
                               : _(msg`Unknown`)}
                           </span>
                         </p>
@@ -345,8 +353,9 @@ export default function SigningCertificate({ loaderData }: Route.ComponentProps)
                             <span className="inline-block">
                               {logs.DOCUMENT_RECIPIENT_REJECTED[0]
                                 ? DateTime.fromJSDate(logs.DOCUMENT_RECIPIENT_REJECTED[0].createdAt)
+                                    .setZone('America/Sao_Paulo')
                                     .setLocale(APP_I18N_OPTIONS.defaultLocale)
-                                    .toFormat('yyyy-MM-dd hh:mm:ss a (ZZZZ)')
+                                    .toFormat('dd/MM/yyyy HH:mm:ss (ZZZZ)')
                                 : _(msg`Unknown`)}
                             </span>
                           </p>
@@ -358,8 +367,9 @@ export default function SigningCertificate({ loaderData }: Route.ComponentProps)
                                 ? DateTime.fromJSDate(
                                     logs.DOCUMENT_RECIPIENT_COMPLETED[0].createdAt,
                                   )
+                                    .setZone('America/Sao_Paulo')
                                     .setLocale(APP_I18N_OPTIONS.defaultLocale)
-                                    .toFormat('yyyy-MM-dd hh:mm:ss a (ZZZZ)')
+                                    .toFormat('dd/MM/yyyy HH:mm:ss (ZZZZ)')
                                 : _(msg`Unknown`)}
                             </span>
                           </p>
