@@ -33,6 +33,9 @@ const MIN_WIDTH_PX = 36;
 const DEFAULT_HEIGHT_PX = MIN_HEIGHT_PX * 2.5;
 const DEFAULT_WIDTH_PX = MIN_WIDTH_PX * 2.5;
 
+const DEFAULT_SIGNATURE_WIDTH_PCT = 29.25;
+const DEFAULT_SIGNATURE_HEIGHT_PCT = 4.07;
+
 export const fieldButtonList = [
   {
     type: FieldType.SIGNATURE,
@@ -248,8 +251,14 @@ export const EnvelopeEditorFieldDragDrop = ({
       let pageX = ((e.pageX - left) / width) * 100;
       let pageY = ((e.pageY - top) / height) * 100;
 
-      const fieldPageWidth = (fieldBounds.current.width / width) * 100;
-      const fieldPageHeight = (fieldBounds.current.height / height) * 100;
+      const isSignatureField =
+        selectedField === FieldType.SIGNATURE || selectedField === FieldType.FREE_SIGNATURE;
+      const fieldPageWidth = isSignatureField
+        ? DEFAULT_SIGNATURE_WIDTH_PCT
+        : (fieldBounds.current.width / width) * 100;
+      const fieldPageHeight = isSignatureField
+        ? DEFAULT_SIGNATURE_HEIGHT_PCT
+        : (fieldBounds.current.height / height) * 100;
 
       pageX -= fieldPageWidth / 2;
       pageY -= fieldPageHeight / 2;
