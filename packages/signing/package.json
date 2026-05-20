@@ -6,7 +6,8 @@
   "license": "AGPLv3",
   "files": [
     "transports/",
-    "index.ts"
+    "index.ts",
+    "per-envelope-cert-store.ts"
   ],
   "scripts": {
     "test": "vitest"

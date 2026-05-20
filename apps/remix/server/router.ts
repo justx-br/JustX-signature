@@ -23,6 +23,8 @@ import { downloadRoute } from './api/download/download';
 import { filesRoute } from './api/files/files';
 import { justxCreateUserRoute } from './api/justx/create-user';
 import { justxDeleteUserRoute } from './api/justx/delete-user';
+import { justxRegisterCertRoute } from './api/justx/register-cert';
+import { justxRegisterCompanyCertRoute } from './api/justx/register-company-cert';
 import { justxRevokeSessionsRoute } from './api/justx/revoke-sessions';
 import { justxUpdatePasswordRoute } from './api/justx/update-password';
 import { type AppContext, appContext } from './context';
@@ -110,6 +112,8 @@ app.route('/api/internal/justx', justxCreateUserRoute);
 app.route('/api/internal/justx', justxDeleteUserRoute);
 app.route('/api/internal/justx', justxUpdatePasswordRoute);
 app.route('/api/internal/justx', justxRevokeSessionsRoute);
+app.route('/api/internal/justx', justxRegisterCertRoute);
+app.route('/api/internal/justx', justxRegisterCompanyCertRoute);
 
 // Files route.
 app.route('/api/files', filesRoute);

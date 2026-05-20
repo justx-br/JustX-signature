@@ -68,12 +68,24 @@ services:
       - NEXT_PUBLIC_DISABLE_SIGNUP=${NEXT_PUBLIC_DISABLE_SIGNUP}
       - NEXT_PRIVATE_SIGNING_LOCAL_FILE_PATH=${NEXT_PRIVATE_SIGNING_LOCAL_FILE_PATH:-/opt/documenso/cert.p12}
       - NEXT_PRIVATE_SIGNING_PASSPHRASE=${NEXT_PRIVATE_SIGNING_PASSPHRASE}
+      # On-demand company e-CNPJ cert used only for paid users that selected
+      # "company_only" or "co_sign". NOT the platform default cert.
+      - NEXT_PRIVATE_COMPANY_CERT_FILE_PATH=${NEXT_PRIVATE_COMPANY_CERT_FILE_PATH:-/opt/documenso-secrets/company-ecnpj.pfx}
+      - NEXT_PRIVATE_COMPANY_CERT_PASSPHRASE=${NEXT_PRIVATE_COMPANY_CERT_PASSPHRASE}
       - NEXT_PRIVATE_BROWSERLESS_URL=${NEXT_PRIVATE_BROWSERLESS_URL}
       - NEXT_PUBLIC_USE_INTERNAL_URL_BROWSERLESS=${NEXT_PUBLIC_USE_INTERNAL_URL_BROWSERLESS}
     ports:
       - '127.0.0.1:3000:${PORT:-3000}'
     volumes:
+      # Default platform cert (Documenso self-signed) used to seal non-paid-user documents
+      # and as fallback for paid "user_only" envelopes. Lives in a named volume so it
+      # persists across restarts and can be regenerated inside the container if needed.
       - documenso_cert:/opt/documenso
+      # Company e-CNPJ certificate, used ONLY when a paid user explicitly selects
+      # "company_only" or "co_sign" on the signing tier choice. Bind-mounted read-only
+      # from a host path that lives OUTSIDE the git working directory (chmod 600, uid 1001).
+      # Set COMPANY_ECNPJ_HOST_PATH in .env to the absolute host path.
+      - ${COMPANY_ECNPJ_HOST_PATH:?Set COMPANY_ECNPJ_HOST_PATH in .env to the absolute host path of company-ecnpj.pfx}:/opt/documenso-secrets/company-ecnpj.pfx:ro
       - ../start.sh:/app/apps/remix/start.sh:ro
     networks:
       - justx-network

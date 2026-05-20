@@ -451,7 +451,10 @@ const decorateAndSignPdf = async ({
 
   pdfDoc = await PDF.load(await pdfDoc.save({ useXRefStream: true }));
 
-  const pdfBytes = await signPdf({ pdf: pdfDoc });
+  // Pass envelope.id so the signer can pick up a user-supplied ICP Brasil
+  // e-CPF certificate registered via /api/internal/justx/register-cert,
+  // if one is present. Falls back to the platform cert when absent.
+  const pdfBytes = await signPdf({ pdf: pdfDoc, envelopeId: String(envelope.id) });
 
   const { name } = path.parse(envelopeItem.title);
 
