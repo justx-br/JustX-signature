@@ -22,6 +22,12 @@ services:
   documenso:
     container_name: documenso
     image: ghcr.io/justx-br/justx-signature:latest
+    build:
+      context: ../..
+      dockerfile: docker/Dockerfile
+      args:
+        NEXT_PRIVATE_ENCRYPTION_KEY: ${NEXT_PRIVATE_ENCRYPTION_KEY}
+        NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY: ${NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY}
     depends_on:
       database:
         condition: service_healthy
