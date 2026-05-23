@@ -2,7 +2,7 @@ name: Deploy Stage
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-push:
@@ -47,56 +47,49 @@ jobs:
             NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY=${{ secrets.NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY }}
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, stage]
     needs: build-and-push
+    permissions:
+      contents: read
+      packages: read
     steps:
-      - name: Deploy to stage server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          port: 22
-          command_timeout: 10m
-          script: |
-            set -e
-            cd /home/shared/documenso
+      - name: Pull latest code on stage server
+        run: |
+          set -e
+          cd ~/JustX/JustX-signature
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git fetch origin
+          git reset --hard origin/main
 
-            # Pull latest code to get updated docker-compose files
-            git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-            git fetch origin
-            git reset --hard origin/main
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
-            # Log in to GitHub Container Registry
-            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Pull image and deploy
+        run: |
+          set -e
+          cd ~/JustX/JustX-signature
 
-            # Convert repo name to lowercase for Docker
-            IMAGE_NAME=$(echo "ghcr.io/${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME=$(echo "ghcr.io/${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
 
-            # Pull the stage image with retries and timeout
-            max_attempts=3
-            attempt=1
-            while [ $attempt -le $max_attempts ]; do
-              echo "Pull attempt $attempt of $max_attempts..."
-              if timeout 600 docker pull ${IMAGE_NAME}:stage; then
-                echo "Pull successful"
-                break
-              else
-                if [ $attempt -eq $max_attempts ]; then
-                  echo "Pull failed after $max_attempts attempts"
-                  exit 1
-                fi
-                echo "Pull failed, retrying in 10 seconds..."
-                sleep 10
-                attempt=$((attempt + 1))
+          max_attempts=3
+          attempt=1
+          while [ $attempt -le $max_attempts ]; do
+            echo "Pull attempt $attempt of $max_attempts..."
+            if timeout 600 docker pull ${IMAGE_NAME}:stage; then
+              echo "Pull successful"
+              break
+            else
+              if [ $attempt -eq $max_attempts ]; then
+                echo "Pull failed after $max_attempts attempts"
+                exit 1
               fi
-            done
+              echo "Pull failed, retrying in 10 seconds..."
+              sleep 10
+              attempt=$((attempt + 1))
+            fi
+          done
 
-            # Tag the stage image as latest for docker-compose
-            docker tag ${IMAGE_NAME}:stage ${IMAGE_NAME}:latest
+          docker tag ${IMAGE_NAME}:stage ${IMAGE_NAME}:latest
 
-            # Deploy using production compose file
-            docker compose -f docker/production/compose.yml --env-file .env up -d documenso
-
-            # Show logs
-            docker compose -f docker/production/compose.yml --env-file .env logs --tail=50 documenso
+          docker compose -f docker/production/compose.yml --env-file .env up -d documenso
+          docker compose -f docker/production/compose.yml --env-file .env logs --tail=50 documenso
