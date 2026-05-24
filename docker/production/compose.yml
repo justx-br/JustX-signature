@@ -81,7 +81,7 @@ services:
       - NEXT_PRIVATE_BROWSERLESS_URL=${NEXT_PRIVATE_BROWSERLESS_URL}
       - NEXT_PUBLIC_USE_INTERNAL_URL_BROWSERLESS=${NEXT_PUBLIC_USE_INTERNAL_URL_BROWSERLESS}
     ports:
-      - '127.0.0.1:3000:${PORT:-3000}'
+      - '127.0.0.1:3010:${PORT:-3000}'
     volumes:
       # Default platform cert (Documenso self-signed) used to seal non-paid-user documents
       # and as fallback for paid "user_only" envelopes. Lives in a named volume so it
