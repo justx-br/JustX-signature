@@ -23,7 +23,7 @@ import {
 import { PasswordInput } from '@documenso/ui/primitives/password-input';
 import { useToast } from '@documenso/ui/primitives/use-toast';
 
-export const ZPasswordFormSchema = z
+const ZChangePasswordFormSchema = z
   .object({
     currentPassword: ZCurrentPasswordSchema,
     password: ZPasswordSchema,
@@ -34,29 +34,47 @@ export const ZPasswordFormSchema = z
     path: ['repeatedPassword'],
   });
 
-export type TPasswordFormSchema = z.infer<typeof ZPasswordFormSchema>;
+const ZSetPasswordFormSchema = z
+  .object({
+    password: ZPasswordSchema,
+    repeatedPassword: ZPasswordSchema,
+  })
+  .refine((data) => data.password === data.repeatedPassword, {
+    message: 'Passwords do not match',
+    path: ['repeatedPassword'],
+  });
+
+export const ZPasswordFormSchema = ZChangePasswordFormSchema;
+export type TPasswordFormSchema = z.infer<typeof ZChangePasswordFormSchema>;
 
 export type PasswordFormProps = {
   className?: string;
   user: SessionUser;
+  hasPassword?: boolean;
 };
 
-export const PasswordForm = ({ className }: PasswordFormProps) => {
+export const PasswordForm = ({ className, hasPassword = true }: PasswordFormProps) => {
   const { _ } = useLingui();
   const { toast } = useToast();
 
-  const form = useForm<TPasswordFormSchema>({
-    values: {
-      currentPassword: '',
-      password: '',
-      repeatedPassword: '',
-    },
-    resolver: zodResolver(ZPasswordFormSchema),
+  const changeForm = useForm<z.infer<typeof ZChangePasswordFormSchema>>({
+    values: { currentPassword: '', password: '', repeatedPassword: '' },
+    resolver: zodResolver(ZChangePasswordFormSchema),
   });
 
+  const setForm = useForm<z.infer<typeof ZSetPasswordFormSchema>>({
+    values: { password: '', repeatedPassword: '' },
+    resolver: zodResolver(ZSetPasswordFormSchema),
+  });
+
+  const form = hasPassword ? changeForm : setForm;
   const isSubmitting = form.formState.isSubmitting;
 
-  const onFormSubmit = async ({ currentPassword, password }: TPasswordFormSchema) => {
+  const onFormSubmit = async (
+    data: z.infer<typeof ZChangePasswordFormSchema> | z.infer<typeof ZSetPasswordFormSchema>,
+  ) => {
+    const currentPassword = 'currentPassword' in data ? data.currentPassword : undefined;
+    const { password } = data;
     try {
       await authClient.emailPassword.updatePassword({
         currentPassword,
@@ -97,24 +115,26 @@ export const PasswordForm = ({ className }: PasswordFormProps) => {
     <Form {...form}>
       <form
         className={cn('flex w-full flex-col gap-y-4', className)}
-        onSubmit={form.handleSubmit(onFormSubmit)}
+        onSubmit={form.handleSubmit(onFormSubmit as Parameters<typeof form.handleSubmit>[0])}
       >
         <fieldset className="flex w-full flex-col gap-y-4" disabled={isSubmitting}>
-          <FormField
-            control={form.control}
-            name="currentPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  <Trans>Current Password</Trans>
-                </FormLabel>
-                <FormControl>
-                  <PasswordInput autoComplete="current-password" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {hasPassword && (
+            <FormField
+              control={changeForm.control}
+              name="currentPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    <Trans>Current Password</Trans>
+                  </FormLabel>
+                  <FormControl>
+                    <PasswordInput autoComplete="current-password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <FormField
             control={form.control}
@@ -122,7 +142,7 @@ export const PasswordForm = ({ className }: PasswordFormProps) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  <Trans>New Password</Trans>
+                  {hasPassword ? <Trans>New Password</Trans> : <Trans>Password</Trans>}
                 </FormLabel>
                 <FormControl>
                   <PasswordInput autoComplete="new-password" {...field} />
@@ -151,7 +171,17 @@ export const PasswordForm = ({ className }: PasswordFormProps) => {
 
         <div className="ml-auto mt-4">
           <Button type="submit" loading={isSubmitting}>
-            {isSubmitting ? <Trans>Updating password...</Trans> : <Trans>Update password</Trans>}
+            {isSubmitting ? (
+              hasPassword ? (
+                <Trans>Updating password...</Trans>
+              ) : (
+                <Trans>Setting password...</Trans>
+              )
+            ) : hasPassword ? (
+              <Trans>Update password</Trans>
+            ) : (
+              <Trans>Set password</Trans>
+            )}
           </Button>
         </div>
       </form>

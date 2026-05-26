@@ -10,6 +10,7 @@
 import { Hono } from 'hono';
 
 import { createUserWithToken } from '@documenso/lib/server-only/admin/create-user-with-token';
+import { setAvatarImage } from '@documenso/lib/server-only/profile/set-avatar-image';
 import { env } from '@documenso/lib/utils/env';
 import { prisma } from '@documenso/prisma';
 
@@ -44,7 +45,7 @@ export const justxCreateUserRoute = new Hono<HonoEnv>().post('/create-user', asy
     return c.json({ error: 'Unauthorized' }, 401);
   }
 
-  let body: { name?: string; email?: string; password?: string };
+  let body: { name?: string; email?: string; password?: string; avatar_url?: string };
   try {
     body = await c.req.json();
   } catch {
@@ -52,7 +53,7 @@ export const justxCreateUserRoute = new Hono<HonoEnv>().post('/create-user', asy
     return c.json({ error: 'Invalid JSON body. Expected { name, email, password }' }, 400);
   }
 
-  const { name, email, password } = body;
+  const { name, email, password, avatar_url } = body;
   if (!name || !email || !password) {
     log.info({ msg: 'JustX provisioning 400', reason: 'missing fields' });
     return c.json({ error: 'Missing required fields: name, email, password' }, 400);
@@ -72,6 +73,25 @@ export const justxCreateUserRoute = new Hono<HonoEnv>().post('/create-user', asy
     });
 
     const team_url = team?.url ?? '';
+
+    // Best-effort: set avatar from Google profile picture URL.
+    if (avatar_url && typeof avatar_url === 'string' && avatar_url.startsWith('https://')) {
+      try {
+        const imgResp = await fetch(avatar_url);
+        if (imgResp.ok) {
+          const buffer = await imgResp.arrayBuffer();
+          const base64 = Buffer.from(buffer).toString('base64');
+          await setAvatarImage({
+            userId: result.userId,
+            target: { type: 'user' },
+            bytes: base64,
+            requestMetadata: { requestMetadata: {}, source: 'app', auth: null },
+          });
+        }
+      } catch (avatarErr) {
+        log.warn({ msg: 'Failed to set avatar from URL', avatar_url, error: String(avatarErr) });
+      }
+    }
 
     log.info({
       msg: 'JustX provisioning 200',

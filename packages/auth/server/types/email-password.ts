@@ -67,7 +67,7 @@ export const ZResendVerifyEmailSchema = z.object({
 export type TResendVerifyEmailSchema = z.infer<typeof ZResendVerifyEmailSchema>;
 
 export const ZUpdatePasswordSchema = z.object({
-  currentPassword: ZCurrentPasswordSchema,
+  currentPassword: ZCurrentPasswordSchema.optional(),
   password: ZPasswordSchema,
 });
 

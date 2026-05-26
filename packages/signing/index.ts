@@ -83,6 +83,7 @@ export const signPdf = async ({ pdf, envelopeId }: SignOptions) => {
 
   const firstSigResult = await pdf.sign({
     signer,
+    signingTime: new Date(),
     reason: companySeal ? 'Assinatura do signatário' : 'Signed by JustX',
     location: NEXT_PUBLIC_WEBAPP_URL(),
     contactInfo: NEXT_PUBLIC_SIGNING_CONTACT_INFO(),
@@ -109,6 +110,7 @@ export const signPdf = async ({ pdf, envelopeId }: SignOptions) => {
 
   const secondSigResult = await reloadedPdf.sign({
     signer: companySigner,
+    signingTime: new Date(),
     reason: 'Selo de plataforma JustX',
     location: NEXT_PUBLIC_WEBAPP_URL(),
     contactInfo: NEXT_PUBLIC_SIGNING_CONTACT_INFO(),

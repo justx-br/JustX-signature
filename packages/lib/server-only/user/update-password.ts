@@ -10,7 +10,7 @@ import { AppError } from '../../errors/app-error';
 export type UpdatePasswordOptions = {
   userId: number;
   password: string;
-  currentPassword: string;
+  currentPassword?: string;
   requestMetadata?: RequestMetadata;
 };
 
@@ -27,19 +27,21 @@ export const updatePassword = async ({
     },
   });
 
-  if (!user.password) {
-    throw new AppError('NO_PASSWORD');
-  }
+  if (user.password) {
+    // User already has a password — require the current one to change it.
+    if (!currentPassword) {
+      throw new AppError('INCORRECT_PASSWORD');
+    }
 
-  const isCurrentPasswordValid = await compare(currentPassword, user.password);
-  if (!isCurrentPasswordValid) {
-    throw new AppError('INCORRECT_PASSWORD');
-  }
+    const isCurrentPasswordValid = await compare(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      throw new AppError('INCORRECT_PASSWORD');
+    }
 
-  // Compare the new password with the old password
-  const isSamePassword = await compare(password, user.password);
-  if (isSamePassword) {
-    throw new AppError('SAME_PASSWORD');
+    const isSamePassword = await compare(password, user.password);
+    if (isSamePassword) {
+      throw new AppError('SAME_PASSWORD');
+    }
   }
 
   const hashedNewPassword = await hash(password, SALT_ROUNDS);

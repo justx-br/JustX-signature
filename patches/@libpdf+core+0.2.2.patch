@@ -1,0 +1,15 @@
+diff --git a/node_modules/@libpdf/core/dist/index.mjs b/node_modules/@libpdf/core/dist/index.mjs
+index 5d7690f..45ee1e3 100644
+--- a/node_modules/@libpdf/core/dist/index.mjs
++++ b/node_modules/@libpdf/core/dist/index.mjs
+@@ -628,7 +628,9 @@ var PdfDict = class PdfDict {
+ */
+ function formatPdfDate(date) {
+ 	const pad = (n, len = 2) => n.toString().padStart(len, "0");
+-	return `D:${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}${pad(date.getUTCSeconds())}Z`;
++	const SAO_PAULO_OFFSET_MS = -3 * 60 * 60 * 1000; // UTC-3 (America/Sao_Paulo)
++	const local = new Date(date.getTime() + SAO_PAULO_OFFSET_MS);
++	return `D:${local.getUTCFullYear()}${pad(local.getUTCMonth() + 1)}${pad(local.getUTCDate())}${pad(local.getUTCHours())}${pad(local.getUTCMinutes())}${pad(local.getUTCSeconds())}-03'00'`;
+ }
+ /**
+ * Parse a PDF date string into a JavaScript Date.
