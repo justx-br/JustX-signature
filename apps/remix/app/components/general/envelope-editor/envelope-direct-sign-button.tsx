@@ -7,6 +7,7 @@ import { SendIcon } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
 import { useCurrentEnvelopeEditor } from '@documenso/lib/client-only/providers/envelope-editor-provider';
+import { useSession } from '@documenso/lib/client-only/providers/session';
 import { extractDocumentAuthMethods } from '@documenso/lib/utils/document-auth';
 import { getRecipientsWithMissingFields } from '@documenso/lib/utils/recipients';
 import { trpc as trpcReact } from '@documenso/trpc/react';
@@ -20,6 +21,7 @@ import { useToast } from '@documenso/ui/primitives/use-toast';
 export const EnvelopeDirectSignButton = () => {
   const { envelope, syncEnvelope, isAutosaving, autosaveError, flushAutosave } =
     useCurrentEnvelopeEditor();
+  const { user } = useSession();
   const { toast } = useToast();
   const { t } = useLingui();
   const navigate = useNavigate();
@@ -105,15 +107,21 @@ export const EnvelopeDirectSignButton = () => {
         },
       });
 
-      // Get first recipient's token
-      const firstRecipient = result.recipients[0];
+      // Find the owner's own recipient so the editor user is taken to THEIR signing
+      // page (and only sees their own fields). Falls back to the first recipient
+      // for solo envelopes where there's no email match.
+      const ownerEmail = user?.email?.toLowerCase();
+      const ownerRecipient = ownerEmail
+        ? result.recipients.find((r) => r.email?.toLowerCase() === ownerEmail)
+        : null;
+      const targetRecipient = ownerRecipient ?? result.recipients[0];
 
-      if (!firstRecipient?.token) {
+      if (!targetRecipient?.token) {
         throw new Error('No signing token returned');
       }
 
       // Redirect to signing page (autoSign=true triggers the signature dialog immediately)
-      const signingPath = `/sign/${firstRecipient.token}?autoSign=true`;
+      const signingPath = `/sign/${targetRecipient.token}?autoSign=true`;
 
       toast({
         title: t`Document ready`,
