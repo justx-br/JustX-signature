@@ -112,10 +112,10 @@ export const PasswordForm = ({ className, hasPassword = true }: PasswordFormProp
   };
 
   return (
-    <Form {...form}>
+    <Form {...(form as typeof setForm)}>
       <form
         className={cn('flex w-full flex-col gap-y-4', className)}
-        onSubmit={form.handleSubmit(onFormSubmit as Parameters<typeof form.handleSubmit>[0])}
+        onSubmit={form.handleSubmit(onFormSubmit as Parameters<typeof setForm.handleSubmit>[0])}
       >
         <fieldset className="flex w-full flex-col gap-y-4" disabled={isSubmitting}>
           {hasPassword && (
@@ -137,7 +137,7 @@ export const PasswordForm = ({ className, hasPassword = true }: PasswordFormProp
           )}
 
           <FormField
-            control={form.control}
+            control={form.control as typeof setForm.control}
             name="password"
             render={({ field }) => (
               <FormItem>
@@ -153,7 +153,7 @@ export const PasswordForm = ({ className, hasPassword = true }: PasswordFormProp
           />
 
           <FormField
-            control={form.control}
+            control={form.control as typeof setForm.control}
             name="repeatedPassword"
             render={({ field }) => (
               <FormItem>

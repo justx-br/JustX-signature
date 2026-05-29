@@ -49,8 +49,11 @@ export const justxGenerateLoginUrlRoute = new Hono<HonoEnv>().post(
         expiresAt: Date.now() + TTL_MS,
       });
 
-      const webappUrl = env('NEXT_PUBLIC_WEBAPP_URL').replace(/\/$/, '');
-      const loginUrl = `${webappUrl}/api/auth/email-password/sso?token=${encodeURIComponent(token)}&redirect=${encodeURIComponent(redirectTo)}`;
+      const webappUrl = env('NEXT_PUBLIC_WEBAPP_URL');
+      if (!webappUrl) {
+        return c.json({ error: 'NEXT_PUBLIC_WEBAPP_URL not configured' }, 500);
+      }
+      const loginUrl = `${webappUrl.replace(/\/$/, '')}/api/auth/email-password/sso?token=${encodeURIComponent(token)}&redirect=${encodeURIComponent(redirectTo)}`;
 
       return c.json({ login_url: loginUrl });
     } catch (err) {
