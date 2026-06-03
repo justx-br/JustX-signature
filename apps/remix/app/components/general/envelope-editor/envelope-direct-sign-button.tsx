@@ -16,7 +16,8 @@ import { useToast } from '@documenso/ui/primitives/use-toast';
 
 /**
  * Button component that distributes the envelope and redirects directly to the signing page.
- * Used for single-signer flows where no email notification is needed.
+ * Distributes with EMAIL so outside signers receive their recipientSigningRequest link.
+ * The button owner is still sent to /sign/{token} directly after distribution.
  */
 export const EnvelopeDirectSignButton = () => {
   const { envelope, syncEnvelope, isAutosaving, autosaveError, flushAutosave } =
@@ -99,11 +100,12 @@ export const EnvelopeDirectSignButton = () => {
         await flushAutosave();
       }
 
-      // Distribute with NONE method (no emails sent)
+      // Distribute using EMAIL so outside signers receive their recipientSigningRequest
+      // link. For solo envelopes the owner is still redirected to sign directly below.
       const result = await distributeEnvelope({
         envelopeId: envelope.id,
         meta: {
-          distributionMethod: DocumentDistributionMethod.NONE,
+          distributionMethod: DocumentDistributionMethod.EMAIL,
         },
       });
 
