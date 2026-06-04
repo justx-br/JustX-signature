@@ -95,7 +95,7 @@ RUN npx prisma generate --schema=packages/prisma/schema.prisma && \
 RUN npm install -g "turbo@^1.9.3"
 
 # Normalize Windows CRLF in shell scripts so shebangs work in Alpine.
-RUN find apps/remix/.bin docker -name '*.sh' -exec sed -i 's/\r$//' {} +
+RUN find apps/remix/.bin -name '*.sh' -exec sed -i 's/\r$//' {} +
 
 RUN turbo run build --filter=@documenso/remix...
 
@@ -147,6 +147,7 @@ COPY --from=installer --chown=nodejs:nodejs /app/node_modules/@prisma ./node_mod
 
 # Get the start script from docker/
 COPY --chown=nodejs:nodejs ./docker/start.sh /app/apps/remix/start.sh
+RUN sed -i 's/\r$//' /app/apps/remix/start.sh
 
 WORKDIR /app/apps/remix
 
