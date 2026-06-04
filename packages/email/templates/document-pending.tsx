@@ -3,7 +3,9 @@ import type { TemplateDocumentPendingProps } from '../template-components/templa
 import { TemplateDocumentPending } from '../template-components/template-document-pending';
 import { TemplateFooter } from '../template-components/template-footer';
 
-export type DocumentPendingEmailTemplateProps = Partial<TemplateDocumentPendingProps>;
+export type DocumentPendingEmailTemplateProps = Partial<TemplateDocumentPendingProps> & {
+  assetBaseUrl?: string;
+};
 
 export const DocumentPendingEmailTemplate = ({
   documentName = 'Open Source Pledge.pdf',

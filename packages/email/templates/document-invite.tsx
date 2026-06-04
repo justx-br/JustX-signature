@@ -12,6 +12,7 @@ import { TemplateDocumentInvite } from '../template-components/template-document
 import { TemplateFooter } from '../template-components/template-footer';
 
 export type DocumentInviteEmailTemplateProps = Partial<TemplateDocumentInviteProps> & {
+  assetBaseUrl?: string;
   customBody?: string;
   role: RecipientRole;
   selfSigner?: boolean;
