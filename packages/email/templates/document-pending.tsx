@@ -1,8 +1,4 @@
-import { msg } from '@lingui/core/macro';
-import { useLingui } from '@lingui/react';
-
 import { Body, Container, Head, Html, Img, Preview, Section } from '../components';
-import { useBranding } from '../providers/branding';
 import type { TemplateDocumentPendingProps } from '../template-components/template-document-pending';
 import { TemplateDocumentPending } from '../template-components/template-document-pending';
 import { TemplateFooter } from '../template-components/template-footer';
@@ -13,11 +9,6 @@ export const DocumentPendingEmailTemplate = ({
   documentName = 'Open Source Pledge.pdf',
   assetBaseUrl = 'http://localhost:3002',
 }: DocumentPendingEmailTemplateProps) => {
-  const { _ } = useLingui();
-  const branding = useBranding();
-
-  const previewText = msg`Pending Document`;
-
   const getAssetUrl = (path: string) => {
     return new URL(path, assetBaseUrl).toString();
   };
@@ -25,23 +16,21 @@ export const DocumentPendingEmailTemplate = ({
   return (
     <Html>
       <Head />
-      <Preview>{_(previewText)}</Preview>
+      <Preview>Documento aguardando assinatura</Preview>
 
       <Body className="mx-auto my-auto font-sans">
         <Section className="bg-white">
-          <Container className="mx-auto mb-2 mt-8 max-w-xl rounded-lg border border-solid border-slate-200 p-4 backdrop-blur-sm">
-            <Section>
-              {branding.brandingEnabled && branding.brandingLogo ? (
-                <Img src={branding.brandingLogo} alt="Branding Logo" className="mb-4 h-6" />
-              ) : (
-                <Img
-                  src={getAssetUrl('/static/logo.svg')}
-                  alt="Justx Logo"
-                  className="mb-4 h-6"
-                />
-              )}
+          <Container className="mx-auto mb-2 mt-8 max-w-xl overflow-hidden rounded-lg border border-solid border-slate-200">
+            <Section className="bg-black px-6 py-5 text-center">
+              <Img
+                src={getAssetUrl('/static/justxwhite.png')}
+                alt="JustX"
+                className="mx-auto h-8 w-auto max-w-[200px]"
+              />
+            </Section>
 
-              <TemplateDocumentPending documentName={documentName} assetBaseUrl={assetBaseUrl} />
+            <Section className="bg-white p-6 text-center">
+              <TemplateDocumentPending documentName={documentName} />
             </Section>
           </Container>
 

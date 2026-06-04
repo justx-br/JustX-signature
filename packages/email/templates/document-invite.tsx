@@ -1,13 +1,11 @@
 import { msg } from '@lingui/core/macro';
 import { useLingui } from '@lingui/react';
-import { Trans } from '@lingui/react/macro';
 import type { RecipientRole } from '@prisma/client';
 import { OrganisationType } from '@prisma/client';
 
 import { RECIPIENT_ROLES_DESCRIPTION } from '@documenso/lib/constants/recipient-roles';
 
-import { Body, Container, Head, Hr, Html, Img, Link, Preview, Section, Text } from '../components';
-import { useBranding } from '../providers/branding';
+import { Body, Container, Head, Html, Img, Link, Preview, Section, Text } from '../components';
 import { TemplateCustomMessageBody } from '../template-components/template-custom-message-body';
 import type { TemplateDocumentInviteProps } from '../template-components/template-document-invite';
 import { TemplateDocumentInvite } from '../template-components/template-document-invite';
@@ -37,7 +35,6 @@ export const DocumentInviteEmailTemplate = ({
   organisationType,
 }: DocumentInviteEmailTemplateProps) => {
   const { _ } = useLingui();
-  const branding = useBranding();
 
   const action = _(RECIPIENT_ROLES_DESCRIPTION[role].actionVerb).toLowerCase();
 
@@ -63,25 +60,22 @@ export const DocumentInviteEmailTemplate = ({
       <Preview>{_(previewText)}</Preview>
 
       <Body className="mx-auto my-auto bg-white font-sans">
-        <Section>
-          <Container className="mx-auto mb-2 mt-8 max-w-xl rounded-lg border border-solid border-slate-200 p-4 backdrop-blur-sm">
-            <Section>
-              {branding.brandingEnabled && branding.brandingLogo ? (
-                <Img src={branding.brandingLogo} alt="Branding Logo" className="mb-4 h-6" />
-              ) : (
-                <Img
-                  src={getAssetUrl('/static/logo.svg')}
-                  alt="Justx Logo"
-                  className="mb-4 h-6"
-                />
-              )}
+        <Section className="bg-white">
+          <Container className="mx-auto mb-2 mt-8 max-w-xl overflow-hidden rounded-lg border border-solid border-slate-200">
+            <Section className="bg-black px-6 py-5 text-center">
+              <Img
+                src={getAssetUrl('/static/justxwhite.png')}
+                alt="JustX"
+                className="mx-auto h-8 w-auto max-w-[200px]"
+              />
+            </Section>
 
+            <Section className="bg-white p-6 text-center">
               <TemplateDocumentInvite
                 inviterName={inviterName}
                 inviterEmail={inviterEmail}
                 documentName={documentName}
                 signDocumentLink={signDocumentLink}
-                assetBaseUrl={assetBaseUrl}
                 role={role}
                 selfSigner={selfSigner}
                 organisationType={organisationType}
@@ -89,34 +83,29 @@ export const DocumentInviteEmailTemplate = ({
                 includeSenderDetails={includeSenderDetails}
               />
             </Section>
-          </Container>
 
-          <Container className="mx-auto mt-12 max-w-xl">
-            <Section>
+            <Section className="border-t border-slate-100 bg-white px-6 pb-6 text-left">
               {organisationType === OrganisationType.PERSONAL && (
-                <Text className="my-4 text-base font-semibold">
-                  <Trans>
-                    {inviterName}{' '}
-                    <Link className="font-normal text-slate-400" href="mailto:{inviterEmail}">
-                      ({inviterEmail})
-                    </Link>
-                  </Trans>
+                <Text className="mb-1 text-base font-semibold text-black">
+                  {inviterName}{' '}
+                  <Link className="font-normal text-slate-400" href={`mailto:${inviterEmail}`}>
+                    ({inviterEmail})
+                  </Link>
                 </Text>
               )}
 
-              <Text className="mt-2 text-base text-slate-400">
+              <Text className="mt-0 text-sm text-slate-400">
                 {customBody ? (
                   <TemplateCustomMessageBody text={customBody} />
                 ) : (
-                  <Trans>
-                    {inviterName} has invited you to {action} the document "{documentName}".
-                  </Trans>
+                  <>
+                    {inviterName} convidou você para {action} o documento &ldquo;{documentName}
+                    &rdquo;.
+                  </>
                 )}
               </Text>
             </Section>
           </Container>
-
-          <Hr className="mx-auto mt-12 max-w-xl" />
 
           <Container className="mx-auto max-w-xl">
             <TemplateFooter />
