@@ -197,7 +197,7 @@ export const EnvelopeSignerCompleteDialog = () => {
       return;
     }
 
-    if (nextField.type === FieldType.SIGNATURE) {
+    if (nextField.type === FieldType.SIGNATURE && searchParams.get('autoSign') === 'true') {
       const signatureToInsert = await SignFieldSignatureDialog.call({
         fullName,
         initialSignature: signature ?? undefined,

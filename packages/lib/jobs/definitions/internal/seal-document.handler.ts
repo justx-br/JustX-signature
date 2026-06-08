@@ -169,52 +169,11 @@ export const run = async ({
       });
     }
 
-    let certificateDoc: PDF | null = null;
-    let auditLogDoc: PDF | null = null;
-
-    if (settings.includeSigningCertificate || settings.includeAuditLog) {
-      const certificatePayload = {
-        envelope,
-        recipients: envelope.recipients, // Need to use the recipients from envelope which contains ALL recipients.
-        fields,
-        language: envelope.documentMeta.language,
-        envelopeOwner: {
-          email: envelope.user.email,
-          name: envelope.user.name || '',
-        },
-        envelopeItems: envelopeItems.map((item) => item.title),
-        pageWidth: PDF_SIZE_A4_72PPI.width,
-        pageHeight: PDF_SIZE_A4_72PPI.height,
-      };
-
-      // Use Playwright-based PDF generation if enabled, otherwise use Konva-based generation.
-      // This is a temporary toggle while we validate the Konva-based approach.
-      const usePlaywrightPdf = NEXT_PRIVATE_USE_PLAYWRIGHT_PDF();
-
-      const makeCertificatePdf = async () =>
-        usePlaywrightPdf
-          ? getCertificatePdf({
-              documentId,
-              language: envelope.documentMeta.language,
-            }).then(async (buffer) => PDF.load(buffer))
-          : generateCertificatePdf(certificatePayload);
-
-      const makeAuditLogPdf = async () =>
-        usePlaywrightPdf
-          ? getAuditLogsPdf({
-              documentId,
-              language: envelope.documentMeta.language,
-            }).then(async (buffer) => PDF.load(buffer))
-          : generateAuditLogPdf(certificatePayload);
-
-      const [createdCertificatePdf, createdAuditLogPdf] = await Promise.all([
-        settings.includeSigningCertificate ? makeCertificatePdf() : null,
-        settings.includeAuditLog ? makeAuditLogPdf() : null,
-      ]);
-
-      certificateDoc = createdCertificatePdf;
-      auditLogDoc = createdAuditLogPdf;
-    }
+    // Per-envelope-item certificates: a recipient should only appear on the
+    // certificate of a document they actually had fields on. The certificate
+    // is appended to every sealed PDF, so building it once for the whole
+    // envelope leaks every recipient's signature image onto every document.
+    const usePlaywrightPdf = NEXT_PRIVATE_USE_PLAYWRIGHT_PDF();
 
     const newDocumentData: Array<{ oldDocumentDataId: string; newDocumentDataId: string }> = [];
 
@@ -225,6 +184,66 @@ export const run = async ({
 
       if (!envelopeItemFields) {
         throw new Error(`Envelope item fields not found for envelope item ${envelopeItem.id}`);
+      }
+
+      let certificateDoc: PDF | null = null;
+      let auditLogDoc: PDF | null = null;
+
+      if (settings.includeSigningCertificate || settings.includeAuditLog) {
+        const recipientIdsOnThisItem = new Set(
+          envelopeItemFields.map((field) => field.recipientId),
+        );
+
+        // Keep CCs on every item (they're observers of the whole envelope, not signers tied to a specific PDF).
+        const itemRecipients = envelope.recipients.filter(
+          (recipient) =>
+            recipientIdsOnThisItem.has(recipient.id) || recipient.role === RecipientRole.CC,
+        );
+
+        const certificatePayload = {
+          envelope,
+          recipients: itemRecipients,
+          fields: envelopeItemFields,
+          language: envelope.documentMeta.language,
+          envelopeOwner: {
+            email: envelope.user.email,
+            name: envelope.user.name || '',
+          },
+          envelopeItems: [envelopeItem.title],
+          pageWidth: PDF_SIZE_A4_72PPI.width,
+          pageHeight: PDF_SIZE_A4_72PPI.height,
+        };
+
+        // Use Playwright-based PDF generation if enabled, otherwise use Konva-based generation.
+        // This is a temporary toggle while we validate the Konva-based approach.
+        //
+        // Note: the Playwright path queries the DB by documentId and does not
+        // yet support per-envelope-item scoping — multi-doc envelopes will
+        // continue to leak recipients across documents until that path is
+        // updated to filter by envelopeItemId.
+        const makeCertificatePdf = async () =>
+          usePlaywrightPdf
+            ? getCertificatePdf({
+                documentId,
+                language: envelope.documentMeta.language,
+              }).then(async (buffer) => PDF.load(buffer))
+            : generateCertificatePdf(certificatePayload);
+
+        const makeAuditLogPdf = async () =>
+          usePlaywrightPdf
+            ? getAuditLogsPdf({
+                documentId,
+                language: envelope.documentMeta.language,
+              }).then(async (buffer) => PDF.load(buffer))
+            : generateAuditLogPdf(certificatePayload);
+
+        const [createdCertificatePdf, createdAuditLogPdf] = await Promise.all([
+          settings.includeSigningCertificate ? makeCertificatePdf() : null,
+          settings.includeAuditLog ? makeAuditLogPdf() : null,
+        ]);
+
+        certificateDoc = createdCertificatePdf;
+        auditLogDoc = createdAuditLogPdf;
       }
 
       const result = await decorateAndSignPdf({
