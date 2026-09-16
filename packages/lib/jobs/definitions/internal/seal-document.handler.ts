@@ -18,7 +18,10 @@ import { generateCertificatePdf } from '@documenso/lib/server-only/pdf/generate-
 import { prisma } from '@documenso/prisma';
 import { signPdf } from '@documenso/signing';
 
-import { NEXT_PRIVATE_USE_PLAYWRIGHT_PDF } from '../../../constants/app';
+import {
+  NEXT_PRIVATE_PRESERVE_EXISTING_SIGNATURES,
+  NEXT_PRIVATE_USE_PLAYWRIGHT_PDF,
+} from '../../../constants/app';
 import { PDF_SIZE_A4_72PPI } from '../../../constants/pdf';
 import { AppError, AppErrorCode } from '../../../errors/app-error';
 import { sendCompletedEmail } from '../../../server-only/document/send-completed-email';
@@ -369,106 +372,147 @@ const decorateAndSignPdf = async ({
 
   let pdfDoc = await PDF.load(pdfData);
 
-  // Normalize and flatten layers that could cause issues with the signature
-  pdfDoc.flattenAll();
-  // Upgrade to PDF 1.7 for better compatibility with signing
-  pdfDoc.upgradeVersion('1.7');
+  // #954 — preserve pre-existing digital signatures (e.g. gov.br) by
+  // skipping everything that would rewrite the byte range they protect,
+  // and stacking the JustX signature as an incremental update instead.
+  const hadSignatures = pdfDoc.getForm()?.properties.hasSignatures ?? false;
+  const incrementalBlocker = pdfDoc.canSaveIncrementally();
+  const preserveMode =
+    hadSignatures &&
+    incrementalBlocker === null &&
+    envelope.internalVersion === 2 &&
+    NEXT_PRIVATE_PRESERVE_EXISTING_SIGNATURES();
 
-  // Add rejection stamp if the document is rejected
-  if (isRejected) {
-    await addRejectionStampToPdf(pdfDoc, rejectionReason);
+  if (hadSignatures && !preserveMode) {
+    // Quantify the cases we still destroy so we can decide follow-up scope.
+    if (incrementalBlocker !== null) {
+      console.warn(
+        `[seal-document] envelope ${envelope.id}: existing signature cannot be ` +
+          `preserved — canSaveIncrementally blocker=${incrementalBlocker}. ` +
+          `Signature will be invalidated by the seal.`,
+      );
+    } else if (envelope.internalVersion === 1) {
+      console.warn(
+        `[seal-document] envelope ${envelope.id}: existing signature on ` +
+          `internalVersion 1 not covered by preserve mode (v2 only). ` +
+          `Signature will be invalidated by the seal.`,
+      );
+    } else {
+      console.warn(
+        `[seal-document] envelope ${envelope.id}: existing signature detected ` +
+          `but NEXT_PRIVATE_PRESERVE_EXISTING_SIGNATURES is disabled. ` +
+          `Signature will be invalidated by the seal.`,
+      );
+    }
   }
 
-  if (certificateDoc) {
-    await pdfDoc.copyPagesFrom(
-      certificateDoc,
-      Array.from({ length: certificateDoc.getPageCount() }, (_, index) => index),
+  if (preserveMode) {
+    console.info(
+      `[seal-document] envelope ${envelope.id}: preserving existing signature — ` +
+        `skipping decoration and stacking JustX signature incrementally.`,
     );
-  }
+  } else {
+    // Normalize and flatten layers that could cause issues with the signature
+    pdfDoc.flattenAll();
+    // Upgrade to PDF 1.7 for better compatibility with signing
+    pdfDoc.upgradeVersion('1.7');
 
-  if (auditLogDoc) {
-    await pdfDoc.copyPagesFrom(
-      auditLogDoc,
-      Array.from({ length: auditLogDoc.getPageCount() }, (_, index) => index),
-    );
-  }
+    // Add rejection stamp if the document is rejected
+    if (isRejected) {
+      await addRejectionStampToPdf(pdfDoc, rejectionReason);
+    }
 
-  // Handle V1 and legacy insertions.
-  if (envelope.internalVersion === 1) {
-    const legacy_pdfLibDoc = await PDFDocument.load(await pdfDoc.save({ useXRefStream: true }));
+    if (certificateDoc) {
+      await pdfDoc.copyPagesFrom(
+        certificateDoc,
+        Array.from({ length: certificateDoc.getPageCount() }, (_, index) => index),
+      );
+    }
 
-    for (const field of envelopeItemFields) {
-      if (field.inserted) {
-        if (envelope.useLegacyFieldInsertion) {
-          await legacy_insertFieldInPDF(legacy_pdfLibDoc, field);
-        } else {
-          await insertFieldInPDFV1(legacy_pdfLibDoc, field);
+    if (auditLogDoc) {
+      await pdfDoc.copyPagesFrom(
+        auditLogDoc,
+        Array.from({ length: auditLogDoc.getPageCount() }, (_, index) => index),
+      );
+    }
+
+    // Handle V1 and legacy insertions.
+    if (envelope.internalVersion === 1) {
+      const legacy_pdfLibDoc = await PDFDocument.load(await pdfDoc.save({ useXRefStream: true }));
+
+      for (const field of envelopeItemFields) {
+        if (field.inserted) {
+          if (envelope.useLegacyFieldInsertion) {
+            await legacy_insertFieldInPDF(legacy_pdfLibDoc, field);
+          } else {
+            await insertFieldInPDFV1(legacy_pdfLibDoc, field);
+          }
         }
       }
+
+      await pdfDoc.reload(await legacy_pdfLibDoc.save());
     }
 
-    await pdfDoc.reload(await legacy_pdfLibDoc.save());
-  }
+    // Handle V2 envelope insertions.
+    if (envelope.internalVersion === 2) {
+      const fieldsGroupedByPage = groupBy(envelopeItemFields, (field) => field.page);
 
-  // Handle V2 envelope insertions.
-  if (envelope.internalVersion === 2) {
-    const fieldsGroupedByPage = groupBy(envelopeItemFields, (field) => field.page);
+      for (const [pageNumber, fields] of Object.entries(fieldsGroupedByPage)) {
+        const page = pdfDoc.getPage(Number(pageNumber) - 1);
 
-    for (const [pageNumber, fields] of Object.entries(fieldsGroupedByPage)) {
-      const page = pdfDoc.getPage(Number(pageNumber) - 1);
+        if (!page) {
+          throw new Error(`Page ${pageNumber} does not exist`);
+        }
 
-      if (!page) {
-        throw new Error(`Page ${pageNumber} does not exist`);
+        const pageWidth = page.width;
+        const pageHeight = page.height;
+
+        const overlayBytes = await insertFieldInPDFV2({
+          pageWidth,
+          pageHeight,
+          fields,
+        });
+
+        const overlayPdf = await PDF.load(overlayBytes);
+
+        const embeddedPage = await pdfDoc.embedPage(overlayPdf, 0);
+
+        // Rotate the page to the orientation that the react-pdf renders on the frontend.
+        let translateX = 0;
+        let translateY = 0;
+
+        switch (page.rotation) {
+          case 90:
+            translateX = pageHeight;
+            translateY = 0;
+            break;
+          case 180:
+            translateX = pageWidth;
+            translateY = pageHeight;
+            break;
+          case 270:
+            translateX = 0;
+            translateY = pageWidth;
+            break;
+        }
+
+        // Draw the overlay on the page
+        page.drawPage(embeddedPage, {
+          x: translateX,
+          y: translateY,
+          rotate: {
+            angle: page.rotation,
+          },
+        });
       }
-
-      const pageWidth = page.width;
-      const pageHeight = page.height;
-
-      const overlayBytes = await insertFieldInPDFV2({
-        pageWidth,
-        pageHeight,
-        fields,
-      });
-
-      const overlayPdf = await PDF.load(overlayBytes);
-
-      const embeddedPage = await pdfDoc.embedPage(overlayPdf, 0);
-
-      // Rotate the page to the orientation that the react-pdf renders on the frontend.
-      let translateX = 0;
-      let translateY = 0;
-
-      switch (page.rotation) {
-        case 90:
-          translateX = pageHeight;
-          translateY = 0;
-          break;
-        case 180:
-          translateX = pageWidth;
-          translateY = pageHeight;
-          break;
-        case 270:
-          translateX = 0;
-          translateY = pageWidth;
-          break;
-      }
-
-      // Draw the overlay on the page
-      page.drawPage(embeddedPage, {
-        x: translateX,
-        y: translateY,
-        rotate: {
-          angle: page.rotation,
-        },
-      });
     }
+
+    // Re-flatten the form to handle our checkbox and radio fields that
+    // create native arcoFields
+    pdfDoc.flattenAll();
+
+    pdfDoc = await PDF.load(await pdfDoc.save({ useXRefStream: true }));
   }
-
-  // Re-flatten the form to handle our checkbox and radio fields that
-  // create native arcoFields
-  pdfDoc.flattenAll();
-
-  pdfDoc = await PDF.load(await pdfDoc.save({ useXRefStream: true }));
 
   // Pass envelope.id so the signer can pick up a user-supplied ICP Brasil
   // e-CPF certificate registered via /api/internal/justx/register-cert,
