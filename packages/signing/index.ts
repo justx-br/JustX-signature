@@ -93,6 +93,8 @@ export const signPdf = async ({ pdf, envelopeId }: SignOptions) => {
     archivalTimestamp: !!tsa,
   });
 
+  logSignWarnings(firstSigResult.warnings, envelopeId, 'primary');
+
   if (!companySeal) {
     return firstSigResult.bytes;
   }
@@ -120,5 +122,27 @@ export const signPdf = async ({ pdf, envelopeId }: SignOptions) => {
     archivalTimestamp: !!tsa,
   });
 
+  logSignWarnings(secondSigResult.warnings, envelopeId, 'company-seal');
+
   return secondSigResult.bytes;
+};
+
+const logSignWarnings = (
+  warnings: ReadonlyArray<{ code: string; message: string }> | undefined,
+  envelopeId: string | undefined,
+  phase: 'primary' | 'company-seal',
+) => {
+  if (!warnings?.length) return;
+
+  const tag = `[justx-signing] envelope=${envelopeId ?? 'unknown'} phase=${phase}`;
+  for (const warning of warnings) {
+    // MDP_VIOLATION means a prior signature declared a DocMDP policy that our
+    // incremental update violates. Escalate so we can quantify and decide
+    // whether to suppress the seal or reject the request. See #954.
+    if (warning.code === 'MDP_VIOLATION') {
+      console.error(`${tag} MDP_VIOLATION: ${warning.message}`);
+    } else {
+      console.warn(`${tag} ${warning.code}: ${warning.message}`);
+    }
+  }
 };

@@ -12,6 +12,15 @@ export const NEXT_PUBLIC_SIGNING_CONTACT_INFO = () =>
 export const NEXT_PRIVATE_USE_LEGACY_SIGNING_SUBFILTER = () =>
   env('NEXT_PRIVATE_USE_LEGACY_SIGNING_SUBFILTER') === 'true';
 
+/**
+ * When a PDF already carries a digital signature (e.g. gov.br), preserve it by
+ * skipping decoration in `decorateAndSignPdf` and stacking the JustX signature
+ * as an incremental update. Default ON; set to `"false"` to fall back to the
+ * legacy destructive flow. See #954.
+ */
+export const NEXT_PRIVATE_PRESERVE_EXISTING_SIGNATURES = () =>
+  env('NEXT_PRIVATE_PRESERVE_EXISTING_SIGNATURES') !== 'false';
+
 export const NEXT_PRIVATE_INTERNAL_WEBAPP_URL = () =>
   env('NEXT_PRIVATE_INTERNAL_WEBAPP_URL') ?? NEXT_PUBLIC_WEBAPP_URL();
 
