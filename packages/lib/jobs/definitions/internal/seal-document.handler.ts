@@ -411,6 +411,23 @@ const decorateAndSignPdf = async ({
       `[seal-document] envelope ${envelope.id}: preserving existing signature — ` +
         `skipping decoration and stacking JustX signature incrementally.`,
     );
+
+    // Append the JustX certificate as new pages. The existing signature's
+    // /ByteRange covers only the original prefix bytes, which stay intact
+    // through the incremental save inside signPdf(). The JustX signature
+    // added on top signs everything including these appended pages, so
+    // VALIDAR sees "user signed X, JustX added and signed X+cert" — the
+    // standard PAdES stacking pattern.
+    //
+    // If VALIDAR flags this as "assinaturas indeterminadas", the fix is
+    // to drop this block back to skip-cert. Audit log is intentionally
+    // omitted here — the certificate alone is the visible JustX mark.
+    if (certificateDoc) {
+      await pdfDoc.copyPagesFrom(
+        certificateDoc,
+        Array.from({ length: certificateDoc.getPageCount() }, (_, index) => index),
+      );
+    }
   } else {
     // Normalize and flatten layers that could cause issues with the signature
     pdfDoc.flattenAll();
